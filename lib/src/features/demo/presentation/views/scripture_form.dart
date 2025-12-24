@@ -33,7 +33,7 @@ class ScriptureFormState extends ConsumerState<ScriptureForm> {
     // Sync with current list provider
     final currentList = ref.watch(currentListProvider);
     if (collectionController.text.isEmpty) {
-       collectionController.text = currentList;
+      collectionController.text = currentList;
     }
 
     return Form(
@@ -72,8 +72,10 @@ class ScriptureFormState extends ConsumerState<ScriptureForm> {
             child: ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  await ref.read(getResultProvider.call(referenceController.text, collectionController.text).future);
-                  
+                  await ref.read(getResultProvider
+                      .call(referenceController.text, collectionController.text)
+                      .future);
+
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(display)),

@@ -67,8 +67,7 @@ class GetResultFamily extends Family<AsyncValue<void>> {
   static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
 
   @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies => _allTransitiveDependencies;
 
   @override
   String? get name => r'getResultProvider';
@@ -89,9 +88,7 @@ class GetResultProvider extends AutoDisposeFutureProvider<void> {
           from: getResultProvider,
           name: r'getResultProvider',
           debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$getResultHash,
+              const bool.fromEnvironment('dart.vm.product') ? null : _$getResultHash,
           dependencies: GetResultFamily._dependencies,
           allTransitiveDependencies: GetResultFamily._allTransitiveDependencies,
           text: text,
@@ -138,9 +135,7 @@ class GetResultProvider extends AutoDisposeFutureProvider<void> {
 
   @override
   bool operator ==(Object other) {
-    return other is GetResultProvider &&
-        other.text == text &&
-        other.currentList == currentList;
+    return other is GetResultProvider && other.text == text && other.currentList == currentList;
   }
 
   @override
@@ -161,8 +156,7 @@ mixin GetResultRef on AutoDisposeFutureProviderRef<void> {
   String get currentList;
 }
 
-class _GetResultProviderElement extends AutoDisposeFutureProviderElement<void>
-    with GetResultRef {
+class _GetResultProviderElement extends AutoDisposeFutureProviderElement<void> with GetResultRef {
   _GetResultProviderElement(super.provider);
 
   @override

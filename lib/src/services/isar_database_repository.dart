@@ -8,7 +8,7 @@ import 'database_repository.dart';
 /// Isar implementation of the database repository
 class IsarDatabaseRepository implements DatabaseRepository {
   late Isar _isar;
-  
+
   @override
   Future<void> init() async {
     if (Isar.instanceNames.isEmpty) {
@@ -30,49 +30,40 @@ class IsarDatabaseRepository implements DatabaseRepository {
       _isar = Isar.getInstance()!;
     }
   }
-  
+
   @override
   Future<void> addScripture(Scripture scripture) async {
     await _isar.writeTxn(() async {
       await _isar.scriptures.put(scripture);
     });
   }
-  
+
   @override
   Future<void> deleteScripture(int scriptureId) async {
     await _isar.writeTxn(() async {
       await _isar.scriptures.delete(scriptureId);
     });
   }
-  
+
   @override
   Future<List<Scripture>> getScripturesByList(String listName) async {
-    return await _isar.scriptures
-        .filter()
-        .listNameMatches(listName)
-        .findAll();
+    return await _isar.scriptures.filter().listNameMatches(listName).findAll();
   }
-  
+
   @override
   Future<int> getScriptureCount() async {
     return await _isar.scriptures.count();
   }
-  
+
   @override
   Future<bool> isListEmpty(String listName) async {
-    final count = await _isar.scriptures
-        .filter()
-        .listNameMatches(listName)
-        .count();
+    final count = await _isar.scriptures.filter().listNameMatches(listName).count();
     return count == 0;
   }
-  
+
   @override
   Future<void> renameList(String oldName, String newName) async {
-    final scriptures = await _isar.scriptures
-        .filter()
-        .listNameMatches(oldName)
-        .findAll();
+    final scriptures = await _isar.scriptures.filter().listNameMatches(oldName).findAll();
     await _isar.writeTxn(() async {
       for (var s in scriptures) {
         s.listName = newName;
@@ -80,16 +71,12 @@ class IsarDatabaseRepository implements DatabaseRepository {
       }
     });
   }
-  
+
   @override
   Future<List<String>> getAllListNames() async {
-    return await _isar.scriptures
-        .where()
-        .distinctByListName()
-        .listNameProperty()
-        .findAll();
+    return await _isar.scriptures.where().distinctByListName().listNameProperty().findAll();
   }
-  
+
   @override
   Future<void> close({bool deleteFromDisk = false}) async {
     await _isar.close(deleteFromDisk: deleteFromDisk);

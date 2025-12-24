@@ -16,27 +16,32 @@ class VerseDialog extends StatelessWidget {
     return SimpleDialog(
       children: [
         Column(children: [
-              Row(children: [
-                  Expanded(
-                    child: Padding(padding: const EdgeInsets.only(left: 10.0),
-                      child: Text("$reference \n($translation)", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),), // Corrected: \n to 
-
-                    ),
-                  ),
-                  Container(alignment: Alignment.topRight,
-                    child: IconButton(
-                      onPressed: () => Share.share("$text\n$reference ($translation)"), // Corrected: \n to 
-
-                      icon: const Icon(Icons.share),
-                      iconSize: 30,
-                      color: Colors.lightBlueAccent,
-                    ),
-                  ),
-                ],
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Text(
+                    "$reference \n($translation)",
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ), // Corrected: \n to
+                ),
               ),
-              BlurPage(text: text),
-            ]
-        )
+              Container(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: () =>
+                      Share.share("$text\n$reference ($translation)"), // Corrected: \n to
+
+                  icon: const Icon(Icons.share),
+                  iconSize: 30,
+                  color: Colors.lightBlueAccent,
+                ),
+              ),
+            ],
+          ),
+          BlurPage(text: text),
+        ])
       ],
     );
   }

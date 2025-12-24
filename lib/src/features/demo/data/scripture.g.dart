@@ -138,8 +138,7 @@ void _scriptureAttach(IsarCollection<dynamic> col, Id id, Scripture object) {
   object.scriptureId = id;
 }
 
-extension ScriptureQueryWhereSort
-    on QueryBuilder<Scripture, Scripture, QWhere> {
+extension ScriptureQueryWhereSort on QueryBuilder<Scripture, Scripture, QWhere> {
   QueryBuilder<Scripture, Scripture, QAfterWhere> anyScriptureId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
@@ -147,10 +146,8 @@ extension ScriptureQueryWhereSort
   }
 }
 
-extension ScriptureQueryWhere
-    on QueryBuilder<Scripture, Scripture, QWhereClause> {
-  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdEqualTo(
-      Id scriptureId) {
+extension ScriptureQueryWhere on QueryBuilder<Scripture, Scripture, QWhereClause> {
+  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdEqualTo(Id scriptureId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: scriptureId,
@@ -159,8 +156,7 @@ extension ScriptureQueryWhere
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdNotEqualTo(
-      Id scriptureId) {
+  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdNotEqualTo(Id scriptureId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -168,14 +164,12 @@ extension ScriptureQueryWhere
               IdWhereClause.lessThan(upper: scriptureId, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(
-                  lower: scriptureId, includeLower: false),
+              IdWhereClause.greaterThan(lower: scriptureId, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(
-                  lower: scriptureId, includeLower: false),
+              IdWhereClause.greaterThan(lower: scriptureId, includeLower: false),
             )
             .addWhereClause(
               IdWhereClause.lessThan(upper: scriptureId, includeUpper: false),
@@ -184,8 +178,7 @@ extension ScriptureQueryWhere
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdGreaterThan(
-      Id scriptureId,
+  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdGreaterThan(Id scriptureId,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -194,8 +187,7 @@ extension ScriptureQueryWhere
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdLessThan(
-      Id scriptureId,
+  QueryBuilder<Scripture, Scripture, QAfterWhereClause> scriptureIdLessThan(Id scriptureId,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -220,8 +212,7 @@ extension ScriptureQueryWhere
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterWhereClause> listNameEqualTo(
-      String listName) {
+  QueryBuilder<Scripture, Scripture, QAfterWhereClause> listNameEqualTo(String listName) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r'listName',
@@ -230,8 +221,7 @@ extension ScriptureQueryWhere
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterWhereClause> listNameNotEqualTo(
-      String listName) {
+  QueryBuilder<Scripture, Scripture, QAfterWhereClause> listNameNotEqualTo(String listName) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -266,8 +256,7 @@ extension ScriptureQueryWhere
   }
 }
 
-extension ScriptureQueryFilter
-    on QueryBuilder<Scripture, Scripture, QFilterCondition> {
+extension ScriptureQueryFilter on QueryBuilder<Scripture, Scripture, QFilterCondition> {
   QueryBuilder<Scripture, Scripture, QAfterFilterCondition> listNameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -356,8 +345,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> listNameContains(
-      String value,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> listNameContains(String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
@@ -368,8 +356,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> listNameMatches(
-      String pattern,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> listNameMatches(String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
@@ -389,8 +376,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      listNameIsNotEmpty() {
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> listNameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'listName',
@@ -412,8 +398,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      referenceGreaterThan(
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> referenceGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -488,8 +473,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> referenceContains(
-      String value,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> referenceContains(String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
@@ -500,8 +484,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> referenceMatches(
-      String pattern,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> referenceMatches(String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
@@ -521,8 +504,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      referenceIsNotEmpty() {
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> referenceIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'reference',
@@ -531,8 +513,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> scriptureIdEqualTo(
-      Id value) {
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> scriptureIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'scriptureId',
@@ -541,8 +522,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      scriptureIdGreaterThan(
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> scriptureIdGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -673,8 +653,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> textContains(
-      String value,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> textContains(String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
@@ -685,8 +664,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> textMatches(
-      String pattern,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> textMatches(String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
@@ -728,8 +706,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      translationGreaterThan(
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -778,8 +755,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      translationStartsWith(
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -805,8 +781,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationContains(
-      String value,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationContains(String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
@@ -817,8 +792,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationMatches(
-      String pattern,
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationMatches(String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
@@ -829,8 +803,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      translationIsEmpty() {
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'translation',
@@ -839,8 +812,7 @@ extension ScriptureQueryFilter
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QAfterFilterCondition>
-      translationIsNotEmpty() {
+  QueryBuilder<Scripture, Scripture, QAfterFilterCondition> translationIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'translation',
@@ -850,11 +822,9 @@ extension ScriptureQueryFilter
   }
 }
 
-extension ScriptureQueryObject
-    on QueryBuilder<Scripture, Scripture, QFilterCondition> {}
+extension ScriptureQueryObject on QueryBuilder<Scripture, Scripture, QFilterCondition> {}
 
-extension ScriptureQueryLinks
-    on QueryBuilder<Scripture, Scripture, QFilterCondition> {}
+extension ScriptureQueryLinks on QueryBuilder<Scripture, Scripture, QFilterCondition> {}
 
 extension ScriptureQuerySortBy on QueryBuilder<Scripture, Scripture, QSortBy> {
   QueryBuilder<Scripture, Scripture, QAfterSortBy> sortByListName() {
@@ -906,8 +876,7 @@ extension ScriptureQuerySortBy on QueryBuilder<Scripture, Scripture, QSortBy> {
   }
 }
 
-extension ScriptureQuerySortThenBy
-    on QueryBuilder<Scripture, Scripture, QSortThenBy> {
+extension ScriptureQuerySortThenBy on QueryBuilder<Scripture, Scripture, QSortThenBy> {
   QueryBuilder<Scripture, Scripture, QAfterSortBy> thenByListName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'listName', Sort.asc);
@@ -969,39 +938,33 @@ extension ScriptureQuerySortThenBy
   }
 }
 
-extension ScriptureQueryWhereDistinct
-    on QueryBuilder<Scripture, Scripture, QDistinct> {
-  QueryBuilder<Scripture, Scripture, QDistinct> distinctByListName(
-      {bool caseSensitive = true}) {
+extension ScriptureQueryWhereDistinct on QueryBuilder<Scripture, Scripture, QDistinct> {
+  QueryBuilder<Scripture, Scripture, QDistinct> distinctByListName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'listName', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QDistinct> distinctByReference(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Scripture, Scripture, QDistinct> distinctByReference({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'reference', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QDistinct> distinctByText(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Scripture, Scripture, QDistinct> distinctByText({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'text', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Scripture, Scripture, QDistinct> distinctByTranslation(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Scripture, Scripture, QDistinct> distinctByTranslation({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'translation', caseSensitive: caseSensitive);
     });
   }
 }
 
-extension ScriptureQueryProperty
-    on QueryBuilder<Scripture, Scripture, QQueryProperty> {
+extension ScriptureQueryProperty on QueryBuilder<Scripture, Scripture, QQueryProperty> {
   QueryBuilder<Scripture, int, QQueryOperations> scriptureIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'scriptureId');

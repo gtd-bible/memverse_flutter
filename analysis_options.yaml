@@ -19,3 +19,11 @@ linter:
 # Set line length to 100 characters for dart format
 formatter:
   line_length: 100
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+
+linter:
+  rules:
+    lines_longer_than_80_chars: false
