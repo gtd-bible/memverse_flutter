@@ -1,5 +1,10 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+
 linter:
   rules:
     prefer_const_constructors: true
@@ -10,3 +15,7 @@ linter:
     unnecessary_new: true
     await_only_futures: true
     curly_braces_in_flow_control_structures: true
+
+# Set line length to 100 characters for dart format
+formatter:
+  line_length: 100
