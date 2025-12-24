@@ -1,0 +1,48 @@
+# Firebender Rules for Memverse Flutter
+
+## Code Style
+- Write clear, concise code comments sparingly
+- Use 100-character line length (configured in analysis_options.yaml)
+- Follow Dart/Flutter conventions and linting rules
+- Prefer expression syntax where it improves readability
+
+## Documentation
+- Keep IMPLEMENTATION.md updated with phase progress, completion dates, and technical decisions
+- Keep COVERAGE.md updated with test coverage by feature flow and LOC percentage
+- Keep MANUAL_TESTING.md updated with manual testing results for each platform
+- Put AI interaction summaries in ai_interactions.log (prompt times, response summaries)
+
+## Testing Strategy
+- Write unit tests first for data models and repositories
+- Write widget tests for UI components
+- Write integration tests for complete user flows
+- Maintain > 80% code coverage for production code
+- Test on both iOS and Android platforms
+- Document all manual testing with clear pass/fail status
+
+## Git Practices
+- Make small, atomic commits with clear messages
+- Use conventional commit format (feat:, fix:, test:, docs:, refactor:, etc.)
+- Include 🤖 Generated with [Firebender] footer in commits
+- Separate refactoring, testing, and feature commits
+- Keep commits focused on single concerns
+
+## Database
+- Use Sembast for local persistence (replaced Isar for better compatibility)
+- Always work through DatabaseRepository abstraction layer
+- Never expose database implementation details to UI layer
+- Write comprehensive repository tests including E2E scenarios
+
+## Architecture
+- Follow feature-first folder structure (lib/src/features/)
+- Use Riverpod for state management
+- Implement repository pattern for data access
+- Keep business logic in providers, not widgets
+- Use GoRouter for navigation
+
+## Testing Documentation Updates
+When adding tests:
+1. Update COVERAGE.md with new test counts and coverage percentages
+2. Add test results to MANUAL_TESTING.md if manually verified
+3. Update IMPLEMENTATION.md phase status when milestones complete
+4. Keep test files organized by feature and layer (unit/widget/integration)
