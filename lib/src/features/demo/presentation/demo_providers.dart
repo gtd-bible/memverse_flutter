@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> fetchScripture(String reference) async {
 
     if (response.statusCode == 200) {
       log.d("200 ok");
-      return jsonDecode(response.body);
+      return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       log.e('status code = ${response.statusCode} message = ${response.reasonPhrase}',
           error: Exception('Failed to load scripture'));
@@ -52,9 +52,9 @@ Future<void> getResult(GetResultRef ref, String text, String currentList) async 
       final json = await fetchScripture(reference);
 
       final newScripture = Scripture(
-        reference: json['reference'],
-        text: json['text'],
-        translation: json['translation_name'],
+        reference: json['reference'] as String,
+        text: json['text'] as String,
+        translation: json['translation_name'] as String,
         listName: currentList,
       );
 

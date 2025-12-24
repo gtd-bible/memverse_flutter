@@ -51,6 +51,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^3.0.0
   build_runner: ^2.4.8
   riverpod_generator: ^2.4.0
@@ -59,6 +61,7 @@ dev_dependencies:
   freezed: ^2.4.7
   mocktail: ^1.0.4
   flutter_launcher_icons: ^0.14.4
+  bdd_widget_test: ^1.7.6
 
 flutter:
   uses-material-design: true

@@ -6,7 +6,7 @@ part of 'demo_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$getResultHash() => r'3974c5d4bc3f4f7cc56b78c859ef4f3ce2d80091';
+String _$getResultHash() => r'08b13da16a81e40699237deccefe61dcd43e321c';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -67,7 +67,8 @@ class GetResultFamily extends Family<AsyncValue<void>> {
   static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
 
   @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies => _allTransitiveDependencies;
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
 
   @override
   String? get name => r'getResultProvider';
@@ -88,7 +89,9 @@ class GetResultProvider extends AutoDisposeFutureProvider<void> {
           from: getResultProvider,
           name: r'getResultProvider',
           debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product') ? null : _$getResultHash,
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$getResultHash,
           dependencies: GetResultFamily._dependencies,
           allTransitiveDependencies: GetResultFamily._allTransitiveDependencies,
           text: text,
@@ -135,7 +138,9 @@ class GetResultProvider extends AutoDisposeFutureProvider<void> {
 
   @override
   bool operator ==(Object other) {
-    return other is GetResultProvider && other.text == text && other.currentList == currentList;
+    return other is GetResultProvider &&
+        other.text == text &&
+        other.currentList == currentList;
   }
 
   @override
@@ -156,7 +161,8 @@ mixin GetResultRef on AutoDisposeFutureProviderRef<void> {
   String get currentList;
 }
 
-class _GetResultProviderElement extends AutoDisposeFutureProviderElement<void> with GetResultRef {
+class _GetResultProviderElement extends AutoDisposeFutureProviderElement<void>
+    with GetResultRef {
   _GetResultProviderElement(super.provider);
 
   @override

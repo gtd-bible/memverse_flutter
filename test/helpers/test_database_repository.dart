@@ -1,20 +1,19 @@
-import 'package:sembast/sembast.dart';
-import 'package:sembast/sembast_memory.dart';
 import 'package:memverse_flutter/src/features/demo/data/scripture.dart';
 import 'package:memverse_flutter/src/services/database_repository.dart';
+import 'package:sembast/sembast_memory.dart';
 
 /// Test implementation of the database repository
 /// Uses Sembast with an in-memory database for isolated testing
 class TestDatabaseRepository implements DatabaseRepository {
   late Database _db;
   final _store = intMapStoreFactory.store('scriptures');
-  
+
   @override
   Future<void> init() async {
     // Use in-memory database for tests
     _db = await databaseFactoryMemory.openDatabase('test.db');
   }
-  
+
   @override
   Future<void> addScripture(Scripture scripture) async {
     final json = scripture.toJson();
@@ -22,12 +21,12 @@ class TestDatabaseRepository implements DatabaseRepository {
     final id = await _store.add(_db, json);
     scripture.id = id;
   }
-  
+
   @override
   Future<void> deleteScripture(int scriptureId) async {
     await _store.record(scriptureId).delete(_db);
   }
-  
+
   @override
   Future<List<Scripture>> getScripturesByList(String listName) async {
     final finder = Finder(
@@ -40,21 +39,18 @@ class TestDatabaseRepository implements DatabaseRepository {
       return Scripture.fromJson(data);
     }).toList();
   }
-  
+
   @override
   Future<int> getScriptureCount() async {
     return await _store.count(_db);
   }
-  
+
   @override
   Future<bool> isListEmpty(String listName) async {
-    final finder = Finder(
-      filter: Filter.equals('listName', listName),
-    );
-    final count = await _store.count(_db, filter: finder.filter);
+    final count = await _store.count(_db, filter: Filter.equals('listName', listName));
     return count == 0;
   }
-  
+
   @override
   Future<void> renameList(String oldName, String newName) async {
     final finder = Finder(
@@ -66,7 +62,7 @@ class TestDatabaseRepository implements DatabaseRepository {
       finder: finder,
     );
   }
-  
+
   @override
   Future<List<String>> getAllListNames() async {
     final records = await _store.find(_db);
@@ -77,7 +73,7 @@ class TestDatabaseRepository implements DatabaseRepository {
         .toList();
     return listNames;
   }
-  
+
   @override
   Future<void> close({bool deleteFromDisk = false}) async {
     if (deleteFromDisk) {

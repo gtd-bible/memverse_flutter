@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:isar/isar.dart';
 import 'package:logger/logger.dart';
+
+import 'package:memverse_flutter/src/services/database.dart';
+import 'package:memverse_flutter/src/services/database_repository.dart';
 import 'package:memverse_flutter/src/features/demo/data/scripture.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/demo_providers.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/views/future_item_tile.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/views/scripture_form.dart';
-import 'package:memverse_flutter/src/services/databases/demo/presentation/views/scripture_form.dart';
 
 var log = Logger();
 
