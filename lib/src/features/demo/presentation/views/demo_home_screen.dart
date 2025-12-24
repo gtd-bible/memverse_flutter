@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:isar/isar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:isar/isar.dart';
 import 'package:logger/logger.dart';
-
-import 'package:memverse_flutter/src/services/database.dart';
 import 'package:memverse_flutter/src/features/demo/data/scripture.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/demo_providers.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/views/future_item_tile.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/views/scripture_form.dart';
+import 'package:memverse_flutter/src/services/databases/demo/presentation/views/scripture_form.dart';
 
 var log = Logger();
 
@@ -23,8 +22,7 @@ class DemoHomeScreen extends ConsumerStatefulWidget {
 class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
   Future<List<Scripture>>? scriptureList;
 
-  Isar get isar => ref.read(databaseProvider).isar;
-  Database get database => ref.read(databaseProvider);
+  DatabaseRepository get database => ref.read(databaseProvider);
 
   @override
   void initState() {
@@ -38,22 +36,20 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
   void initScriptureList() {
     // Initialize DB and default list
     database.init().then((_) async {
-       final String currentList = ref.read(currentListProvider);
-       // Check if default list exists or needs populating
-       int count = await database.getScriptureCount();
-       if (count == 0) {
-         // Default verses
-         await ref.read(getResultProvider.call('Col 1:17, Matt 6:33, Phil 4:13', 'My List').future);
-       }
-       
-       switchCollections(currentList);
+      final String currentList = ref.read(currentListProvider);
+      // Check if default list exists or needs populating
+      int count = await database.getScriptureCount();
+      if (count == 0) {
+        // Default verses
+        await ref.read(getResultProvider.call('Col 1:17, Matt 6:33, Phil 4:13', 'My List').future);
+      }
+
+      switchCollections(currentList);
     });
   }
 
   Future<List<Scripture>> getScriptureList(String listName) async {
-    return await isar.scriptures.filter()
-        .listNameMatches(listName)
-        .findAll();
+    return await database.getScripturesByList(listName);
   }
 
   void refreshScriptureList() {
@@ -62,10 +58,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
   }
 
   Future<List<String>> getCollections() async {
-    return await isar.scriptures.where()
-        .distinctByListName()
-        .listNameProperty()
-        .findAll();
+    return await database.getAllListNames();
   }
 
   void switchCollections(String newList) {
@@ -84,7 +77,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
   @override
   Widget build(BuildContext context) {
     TextEditingController newNameController = TextEditingController();
-    
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -146,8 +139,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.pop(
-                                            context, newNameController.text.trim());
+                                        Navigator.pop(context, newNameController.text.trim());
                                       },
                                       child: const Text('OK'),
                                     ),
@@ -178,7 +170,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
                           ],
                         );
                       });
-                   refreshScriptureList();
+                  refreshScriptureList();
                 },
                 tooltip: 'Add a verse',
                 child: const Icon(Icons.add),
@@ -214,8 +206,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(snapshot.data![index]),
-                    enabled: (snapshot.data![index] !=
-                        ref.watch(currentListProvider)),
+                    enabled: (snapshot.data![index] != ref.watch(currentListProvider)),
                     onTap: () async {
                       switchCollections(snapshot.data![index]);
                       Navigator.of(context).pop();
@@ -240,7 +231,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
             return Text('Error loading verses: ${snapshot.error}');
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-             return const Text("No verses in this list.");
+            return const Text("No verses in this list.");
           }
           return ListView.builder(
               itemCount: snapshot.data!.length,
@@ -252,10 +243,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
                     children: [
                       SlidableAction(
                         onPressed: (context) async {
-                          await isar.writeTxn(() async {
-                            await isar.scriptures.delete(
-                                snapshot.data![index].scriptureId);
-                          });
+                          await database.deleteScripture(snapshot.data![index].scriptureId);
                           refreshScriptureList();
                         },
                         backgroundColor: const Color(0xFFFE4A49),

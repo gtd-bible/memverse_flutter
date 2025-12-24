@@ -1,11 +1,11 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../data/scripture.dart';
 import '../../../services/database.dart';
+import '../data/scripture.dart';
 
 part 'demo_providers.g.dart';
 
@@ -23,10 +23,11 @@ Future<Map<String, dynamic>> fetchScripture(String reference) async {
       log.d("200 ok");
       return jsonDecode(response.body);
     } else {
-      log.e('status code = ${response.statusCode} message = ${response.reasonPhrase}', error: Exception('Failed to load scripture'));
+      log.e('status code = ${response.statusCode} message = ${response.reasonPhrase}',
+          error: Exception('Failed to load scripture'));
       throw Exception('Failed to load scripture');
     }
-  } catch(e) {
+  } catch (e) {
     log.e(e);
     rethrow;
   }
@@ -47,7 +48,7 @@ Future<void> getResult(GetResultRef ref, String text, String currentList) async 
   for (int i = 0; i < result.length; i++) {
     try {
       String reference = result[i];
-      reference = reference.trim(); 
+      reference = reference.trim();
       final json = await fetchScripture(reference);
 
       final newScripture = Scripture()
@@ -57,9 +58,7 @@ Future<void> getResult(GetResultRef ref, String text, String currentList) async 
         ..listName = currentList;
 
       final database = ref.read(databaseProvider);
-      await database.isar.writeTxn(() async {
-        await database.isar.scriptures.put(newScripture);
-      });
+      await database.addScripture(newScripture);
 
       display = "Added ${result[i]}";
       // analytics.logEvent(name: "Added", parameters: {'verse': result[i]});
