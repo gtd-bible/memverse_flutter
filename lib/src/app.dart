@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:memverse_flutter/src/features/demo/presentation/views/demo_home_screen.dart';
+
 // Placeholder screens for Phase 1
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
@@ -32,17 +34,6 @@ class LandingScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class DemoHomeScreen extends StatelessWidget {
-  const DemoHomeScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Demo Mode')),
-      body: const Center(child: Text('Demo Home Placeholder')),
     );
   }
 }

@@ -52,15 +52,20 @@ This plan outlines the steps to build the `memverse_flutter` application by merg
 - [ ] Run `dart run build_runner build`.
 - [ ] Verify "Signed-In Mode" UI on Mobile (Login screen appears).
 - [ ] Verify "Signed-In Mode" UI on Web (Message appears).
+- [ ] **Critical**: Verify `android/app/build.gradle` release configuration matches the original Java/Kotlin Memverse app structure exactly (excluding flavors if not needed).
 - [ ] Commit changes.
 
-## Phase 4: Integration & Navigation Logic
+## Phase 4: Integration, Testing & Final Polish
 - [ ] Create a `LandingScreen` (`/`) as the initial route.
     -   Buttons: "Try Demo" (Go to `/demo`), "Sign In" (Go to `/login`).
 - [ ] Implement Auth State listening in `GoRouter`.
     -   If user is logged in (token exists), redirect `/` to `/memverse-home`.
-- [ ] Update `MaterialApp` theme to combine styles (mostly `Colors.deepPurple` from `scripture-app` or match `memverse_project` theme).
-- [ ] Ensure `Firebase.initializeApp` is called in `main.dart` with correct options (using `flutterfire configure` or existing `firebase_options.dart`).
+- [ ] Update `MaterialApp` theme to combine styles.
+- [ ] Ensure `Firebase.initializeApp` is called in `main.dart`.
+- [ ] **Testing**:
+    -   [ ] Create comprehensive Widget Tests for Demo Mode (Add/Edit/Delete flows).
+    -   [ ] Create E2E Widget Tests covering the full user journey (Landing -> Demo -> Add Verse -> Verify).
+    -   [ ] Create Integration Tests using `integration_test` package for on-device verification.
 - [ ] Finalize `README.md` and `GEMINI.md`.
 - [ ] Commit changes.
 - [ ] Final manual walkthrough of the app.
