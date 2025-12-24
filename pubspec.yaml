@@ -47,6 +47,11 @@ dependencies:
   cupertino_icons: ^1.0.2
   url_launcher: ^6.2.0
   feedback: ^3.0.0
+  talker: ^5.1.9
+  talker_flutter: ^5.0.0-dev.7
+  talker_riverpod_logger: ^5.0.1
+  flutter_secure_storage: ^10.0.0
+  dio_curl_logger: ^1.2.0
 
 dev_dependencies:
   flutter_test:
