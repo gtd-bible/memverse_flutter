@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'database_repository.dart';
-import 'isar_database_repository.dart';
+import 'sembast_database_repository.dart';
 
 /// Provider for the database repository
 /// Can be overridden in tests with a mock implementation
 final databaseRepositoryProvider = Provider<DatabaseRepository>((ref) {
-  return IsarDatabaseRepository();
+  return SembastDatabaseRepository();
 });
 
 /// Legacy provider for backwards compatibility during migration

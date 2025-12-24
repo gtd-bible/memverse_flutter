@@ -51,11 +51,12 @@ Future<void> getResult(GetResultRef ref, String text, String currentList) async 
       reference = reference.trim();
       final json = await fetchScripture(reference);
 
-      final newScripture = Scripture()
-        ..reference = json['reference']
-        ..text = json['text']
-        ..translation = json['translation_name']
-        ..listName = currentList;
+      final newScripture = Scripture(
+        reference: json['reference'],
+        text: json['text'],
+        translation: json['translation_name'],
+        listName: currentList,
+      );
 
       final database = ref.read(databaseProvider);
       await database.addScripture(newScripture);

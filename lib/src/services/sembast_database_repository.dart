@@ -1,33 +1,42 @@
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
-import 'package:sembast/sembast_memory.dart';
-import 'package:memverse_flutter/src/features/demo/data/scripture.dart';
-import 'package:memverse_flutter/src/services/database_repository.dart';
+import 'package:sembast/sembast_io.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-/// Test implementation of the database repository
-/// Uses Sembast with an in-memory database for isolated testing
-class TestDatabaseRepository implements DatabaseRepository {
+import '../features/demo/data/scripture.dart';
+import 'database_repository.dart';
+
+/// Sembast implementation of the database repository
+class SembastDatabaseRepository implements DatabaseRepository {
   late Database _db;
   final _store = intMapStoreFactory.store('scriptures');
-  
+
   @override
   Future<void> init() async {
-    // Use in-memory database for tests
-    _db = await databaseFactoryMemory.openDatabase('test.db');
+    if (kIsWeb) {
+      // For web, use in-memory database
+      _db = await databaseFactoryMemory.openDatabase('memverse.db');
+    } else {
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final dbPath = join(appDocDir.path, 'memverse.db');
+      _db = await databaseFactoryIo.openDatabase(dbPath);
+    }
   }
-  
+
   @override
   Future<void> addScripture(Scripture scripture) async {
     final json = scripture.toJson();
-    json.remove('id');
+    json.remove('id'); // Let Sembast auto-generate the ID
     final id = await _store.add(_db, json);
     scripture.id = id;
   }
-  
+
   @override
   Future<void> deleteScripture(int scriptureId) async {
     await _store.record(scriptureId).delete(_db);
   }
-  
+
   @override
   Future<List<Scripture>> getScripturesByList(String listName) async {
     final finder = Finder(
@@ -40,12 +49,12 @@ class TestDatabaseRepository implements DatabaseRepository {
       return Scripture.fromJson(data);
     }).toList();
   }
-  
+
   @override
   Future<int> getScriptureCount() async {
     return await _store.count(_db);
   }
-  
+
   @override
   Future<bool> isListEmpty(String listName) async {
     final finder = Finder(
@@ -54,7 +63,7 @@ class TestDatabaseRepository implements DatabaseRepository {
     final count = await _store.count(_db, filter: finder.filter);
     return count == 0;
   }
-  
+
   @override
   Future<void> renameList(String oldName, String newName) async {
     final finder = Finder(
@@ -66,7 +75,7 @@ class TestDatabaseRepository implements DatabaseRepository {
       finder: finder,
     );
   }
-  
+
   @override
   Future<List<String>> getAllListNames() async {
     final records = await _store.find(_db);
@@ -77,7 +86,7 @@ class TestDatabaseRepository implements DatabaseRepository {
         .toList();
     return listNames;
   }
-  
+
   @override
   Future<void> close({bool deleteFromDisk = false}) async {
     if (deleteFromDisk) {
@@ -85,11 +94,4 @@ class TestDatabaseRepository implements DatabaseRepository {
     }
     await _db.close();
   }
-}
-
-/// Create a test database repository with in-memory database
-Future<DatabaseRepository> createTestDatabaseRepository() async {
-  final repo = TestDatabaseRepository();
-  await repo.init();
-  return repo;
 }

@@ -243,7 +243,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
                     children: [
                       SlidableAction(
                         onPressed: (context) async {
-                          await database.deleteScripture(snapshot.data![index].scriptureId);
+                          await database.deleteScripture(snapshot.data![index].id!);
                           refreshScriptureList();
                         },
                         backgroundColor: const Color(0xFFFE4A49),

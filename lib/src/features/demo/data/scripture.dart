@@ -1,15 +1,33 @@
-import 'package:isar/isar.dart';
-
-part 'scripture.g.dart';
-
-@collection
 class Scripture {
-  Id scriptureId = Isar.autoIncrement;
+  int? id;
+  String reference;
+  String text;
+  String translation;
+  String listName;
 
-  late String reference;
-  late String text;
-  late String translation;
+  Scripture({
+    this.id,
+    required this.reference,
+    required this.text,
+    required this.translation,
+    this.listName = "My List",
+  });
 
-  @Index()
-  String listName = "My List";
+  // Convert to JSON for Sembast
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'reference': reference,
+        'text': text,
+        'translation': translation,
+        'listName': listName,
+      };
+
+  // Create from JSON
+  factory Scripture.fromJson(Map<String, dynamic> json) => Scripture(
+        id: json['id'] as int?,
+        reference: json['reference'] as String,
+        text: json['text'] as String,
+        translation: json['translation'] as String,
+        listName: json['listName'] as String? ?? "My List",
+      );
 }
