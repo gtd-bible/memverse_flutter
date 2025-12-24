@@ -5,11 +5,18 @@ import 'package:memverse_flutter/src/app.dart';
 import 'package:memverse_flutter/src/utils/talker_provider.dart';
 // import 'package:memverse_flutter/src/features/auth/data/fake_auth_service.dart'; // No longer needed
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:memverse_flutter/firebase_options.dart';
+
 // Global ProviderContainer for integration tests bypass (similar to memverse_project)
 ProviderContainer? globalContainer;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Detect if running in integration test mode via dart-define
   // const isIntegrationTest = bool.fromEnvironment('INTEGRATION_TEST');

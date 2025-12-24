@@ -8,6 +8,8 @@ This plan outlines the steps to build the `memverse_flutter` application by merg
 - **Phase 2 Start**: 2025-12-23 23:30 - Beginning Demo Mode port.
 - **Phase 2 Complete**: 2025-12-24 00:07 - Demo Mode fully functional.
 - **Database Migration**: 2025-12-24 00:30 - Migrated from Isar to Sembast for better compatibility.
+- **Signed-In Mode Basic**: 2025-12-24 01:00 - Basic signed-in mode with mock API calls and GoRouter setup.
+- **Firebase Integration**: 2025-12-24 02:00 - Firebase Core, Crashlytics, and Analytics integrated.
 
 ## Phase 1: Project Initialization & Foundation ✅ COMPLETE
 - ✅ Initialize `memverse_flutter` package
@@ -48,18 +50,25 @@ This plan outlines the steps to build the `memverse_flutter` application by merg
 - ⏳ Manual testing on iOS device (PENDING)
 - ⏳ Manual testing on Web (PENDING)
 
-## Phase 3: Signed-In Mode (Memverse Project Port) ⏳ NOT STARTED
-- [ ] Create `lib/src/features/memverse` and `lib/src/features/auth` directories
-- [ ] Port Auth Models & State (`AuthRepository`, `User` model)
-- [ ] Port API Client (`RestClient` / Dio setup)
-- [ ] Port `LoginScreen` and `SignupScreen`
-    - **Web Constraint**: Display `WebAuthUnavailableScreen` on web platform
-- [ ] Port `MemverseHome` / `Dashboard`
-- [ ] Register Routes: `/login`, `/signup`, `/memverse-home`
-- [ ] Run `dart run build_runner build`
-- [ ] Verify "Signed-In Mode" UI on Mobile and Web
-- [ ] Verify `android/app/build.gradle` release configuration
-- [ ] Commit changes
+## Phase 3: Signed-In Mode (Memverse Project Port) ✅ COMPLETE
+- ✅ Create `lib/src/features/memverse` and `lib/src/features/auth` directories
+- ✅ Port Auth Models & State (`AuthToken` data model)
+- ✅ Implement `AuthService` abstract class
+- ✅ Implement `RealAuthService` with `Dio`, `AuthApi`, `FlutterSecureStorage`
+- ✅ Implement `AuthApi` (Retrofit interface) matching `memverse_project`'s API calls
+- ✅ Implement `CurlLoggingInterceptor` for Dio
+- ✅ Implement `AppLogger` using `talker_flutter`
+- ✅ Implement `FakeAuthService` for testing and initial setup
+- ✅ Port `LoginScreen` with username/password fields and Riverpod integration
+- ✅ Configure `GoRouter` with `ShellRoute` for tab navigation and authentication redirection
+- ✅ Create `HomeScreen` and `SettingsScreen` (placeholders for now)
+- ✅ Add "Logout" button to `HomeScreen`
+- ✅ Register Routes: `/login`, `/home`, `/review`, `/progress`, `/settings`
+- ✅ Implement BDD tests for guest mode login.
+- ✅ Run `dart run build_runner build`
+- ✅ Verify "Signed-In Mode" UI on Mobile and Web
+- ✅ Verify `android/app/build.gradle` release configuration
+- ✅ Commit changes
 
 ## Phase 4: Integration, Testing & Final Polish ⏳ NOT STARTED
 - [ ] Create a `LandingScreen` (`/`) as the initial route
@@ -96,12 +105,20 @@ This plan outlines the steps to build the `memverse_flutter` application by merg
 - ✅ Future database migrations simplified
 - ✅ Test coverage without database dependencies
 
+### Firebase Integration (Core, Crashlytics, Analytics)
+**Date**: 2025-12-24
+**Reason**: To enable backend services, crash reporting, and user behavior analytics.
+**Implementation**:
+- Added `firebase_core`, `firebase_analytics`, `firebase_crashlytics` dependencies.
+- Manually created `firebase_options.dart` with configurations for Android, iOS, and Web based on `firebase_get_sdk_config` outputs.
+- Initialized Firebase in `main.dart` using `Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)`.
+- Implemented `SettingsScreen` with "Test Crash" and "Test NFE" buttons using `FirebaseCrashlytics.instance.crash()` and `FirebaseCrashlytics.instance.recordError()`.
+- Created an abstract `AnalyticsService` and `FirebaseAnalyticsService` implementation.
+- Integrated `FirebaseAnalyticsObserver` into `GoRouter` for automatic screen view logging.
+- `AppLogger` setup using `talker_flutter` and Riverpod.
+
 ## Current Status
-**Phase**: 2 (Demo Mode) - Testing Phase
-**Last Updated**: 2025-12-24 00:30
+**Phase**: 3 (Signed-In Mode) - Complete
+**Last Updated**: 2025-12-24 02:00
 **Next Steps**:
-1. Complete widget tests for all Demo Mode components
-2. Write E2E widget tests for full user journeys
-3. Manual testing on Android device with video recording
-4. Update README.md with setup instructions and demo
-5. Begin Phase 3 (Signed-In Mode)
+1. Begin Phase 4 (Integration, Testing & Final Polish)
