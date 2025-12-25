@@ -6,7 +6,7 @@ part of 'analytics_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$analyticsServiceHash() => r'f13d4385c1701183899e68d0d5df1a0df83b2ef4';
+String _$analyticsServiceHash() => r'b9d6797b0a8f062af1d70100bd5fe2ad178142dc';
 
 /// See also [analyticsService].
 @ProviderFor(analyticsService)

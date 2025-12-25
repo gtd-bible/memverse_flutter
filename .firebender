@@ -1,5 +1,12 @@
 # Firebender Rules for Memverse Flutter
 
+## 🔴 CRITICAL: Read llm_notes.md First
+**Before making ANY changes, read `llm_notes.md` for critical context:**
+- Authentication uses OAuth API, NOT Firebase Auth
+- Database is Sembast, NOT Isar
+- Code MUST compile after every prompt
+- Run `flutter analyze lib` before finishing
+
 ## Code Style
 - Write clear, concise code comments sparingly
 - Use 100-character line length (configured in analysis_options.yaml)

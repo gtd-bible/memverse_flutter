@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:blur/blur.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
 class BlurPage extends StatefulWidget {
@@ -37,9 +36,6 @@ class BlurPageState extends State<BlurPage> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  FirebaseAnalytics.instance
-                      .logEvent(name: "BlurMoreTapped", parameters: {'blurValue': blurValue});
-                  FirebaseAnalytics.instance.setUserProperty(name: "HasBlurred", value: "true");
                   if (blurValue == 0) {
                     // make sure at least one word is blurred when you start.
                     blurValue = 2;
@@ -53,8 +49,6 @@ class BlurPageState extends State<BlurPage> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  FirebaseAnalytics.instance
-                      .logEvent(name: "BlurLessTapped", parameters: {'blurValue': blurValue});
 
                   blurValue--;
                 });

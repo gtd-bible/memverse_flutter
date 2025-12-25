@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memverse_flutter/src/features/demo/data/scripture.dart';
-import 'package:memverse_flutter/src/features/demo/presentation/views/burrable_verse_view.dart';
+import 'package:memverse_flutter/src/features/demo/presentation/views/blurrable_verse_view.dart';
 import 'package:share_plus/share_plus.dart';
 
 class VerseDialog extends StatelessWidget {
