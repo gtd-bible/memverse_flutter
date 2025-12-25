@@ -3,15 +3,25 @@ import 'package:memverse_flutter/src/services/analytics_service.dart';
 import 'package:memverse_flutter/src/utils/app_logger.dart';
 
 class FirebaseAnalyticsService implements AnalyticsService {
-  FirebaseAnalyticsService({FirebaseAnalytics? analytics})
-      : _analytics = analytics ?? FirebaseAnalytics.instance;
+  FirebaseAnalyticsService({FirebaseAnalytics? analytics, bool isIntegrationTest = false})
+      : _analytics = analytics ?? FirebaseAnalytics.instance,
+        _isIntegrationTest = isIntegrationTest;
 
   final FirebaseAnalytics _analytics;
+  final bool _isIntegrationTest;
 
   @override
   Future<void> logEvent(String name, {Map<String, dynamic>? parameters}) async {
-    await _analytics.logEvent(name: name, parameters: parameters);
-    AppLogger.d('Analytics Event: $name, Parameters: $parameters');
+    // Add integration_test property to all events during integration tests
+    final enrichedParams =
+        _isIntegrationTest ? {...?parameters, 'integration_test': true} : parameters;
+
+    // Convert Map<String, dynamic> to Map<String, Object> for Firebase
+    final Map<String, Object>? convertedParams = enrichedParams?.map(
+      (key, value) => MapEntry(key, value as Object),
+    );
+    await _analytics.logEvent(name: name, parameters: convertedParams);
+    AppLogger.d('Analytics Event: $name, Parameters: $enrichedParams');
   }
 
   @override

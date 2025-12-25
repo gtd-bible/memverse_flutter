@@ -1,20 +1,26 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:firebase_core/firebase_core.dart'; // Commented out, not needed yet
-// import 'firebase_options.dart'; // TODO: Generate this
-import 'src/app.dart';
+import 'package:memverse_flutter/firebase_options.dart';
+import 'package:memverse_flutter/src/app.dart';
+import 'package:memverse_flutter/src/utils/app_logger.dart';
 
-void main() async {
+// Global ProviderContainer for integration tests
+ProviderContainer? globalContainer;
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // TODO: Initialize Firebase with generated options
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  globalContainer = ProviderContainer();
+  AppLogger.initialize(globalContainer!);
 
   runApp(
     const ProviderScope(
-      child: MemverseApp(),
+      child: App(),
     ),
   );
 }

@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
-
-import 'package:memverse_flutter/src/services/database.dart';
-import 'package:memverse_flutter/src/services/database_repository.dart';
 import 'package:memverse_flutter/src/features/demo/data/scripture.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/demo_providers.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/views/future_item_tile.dart';
 import 'package:memverse_flutter/src/features/demo/presentation/views/scripture_form.dart';
+import 'package:memverse_flutter/src/services/database.dart';
+import 'package:memverse_flutter/src/services/database_repository.dart';
 
 var log = Logger();
 
@@ -23,7 +22,7 @@ class DemoHomeScreen extends ConsumerStatefulWidget {
 class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
   Future<List<Scripture>>? scriptureList;
 
-  DatabaseRepository get database => ref.read(databaseProvider);
+  DatabaseRepository get database => ref.read(databaseRepositoryProvider);
 
   @override
   void initState() {

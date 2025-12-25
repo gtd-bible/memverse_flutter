@@ -58,7 +58,7 @@ Future<void> getResult(GetResultRef ref, String text, String currentList) async 
         listName: currentList,
       );
 
-      final database = ref.read(databaseProvider);
+      final database = ref.read(databaseRepositoryProvider);
       await database.addScripture(newScripture);
 
       display = "Added ${result[i]}";
