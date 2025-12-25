@@ -1,24 +1,28 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:memverse_flutter/src/features/auth/application/auth_providers.dart';
 import 'package:memverse_flutter/src/features/auth/presentation/views/login_screen.dart';
+import 'package:memverse_flutter/src/features/demo/presentation/views/demo_home_screen.dart';
 import 'package:memverse_flutter/src/features/memverse/presentation/views/home_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/demo',
     routes: [
+      GoRoute(
+        path: '/demo',
+        name: 'demo',
+        builder: (context, state) => const DemoHomeScreen(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => LoginScreen(
           onGuestLogin: () {
-            // This is for guest mode, it might navigate to home directly or to a guest-specific home
-            // For now, let's assume it navigates to home
-            context.go('/');
+            // Navigate to demo mode for guest users
+            context.go('/demo');
           },
         ),
       ),
@@ -30,6 +34,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final isAuthenticated = authState.value;
+
+      // Demo mode is accessible without authentication
+      if (state.matchedLocation == '/demo') {
+        return null;
+      }
 
       // If the user is not authenticated and trying to access a protected route, redirect to login.
       if (isAuthenticated == false) {
