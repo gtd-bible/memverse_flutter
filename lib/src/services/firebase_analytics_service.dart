@@ -27,15 +27,15 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
-  Future<void> logLogin({String? loginMethod}) async {
-    await _analytics.logLogin(loginMethod: loginMethod);
-    AppLogger.d('Analytics Login Event: method = $loginMethod');
+  Future<void> logLogin() async {
+    await _analytics.logLogin(loginMethod: 'email'); // Only method currently supported
+    AppLogger.d('Analytics Login Event');
   }
 
   @override
-  Future<void> logSignUp({String? signUpMethod}) async {
-    await _analytics.logSignUp(signUpMethod: signUpMethod);
-    AppLogger.d('Analytics Sign Up Event: method = $signUpMethod');
+  Future<void> logSignUp() async {
+    await _analytics.logSignUp(signUpMethod: 'email'); // Only method currently supported
+    AppLogger.d('Analytics Sign Up Event');
   }
 
   @override
