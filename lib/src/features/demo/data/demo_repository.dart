@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Added import
 import 'package:http/http.dart' as http;
 import 'package:memverse_flutter/src/features/demo/domain/scripture.dart';
@@ -34,17 +35,16 @@ class DemoRepository {
         final json = jsonDecode(response.body);
         final newScripture = Scripture(
           id: _scriptures.length + 1, // Simple ID generation
-          reference: json['reference'],
-          text: json['text'],
-          translation: json['translation_name'],
+          reference: json['reference'] as String? ?? reference,
+          text: json['text'] as String? ?? '',
+          translation: json['translation_name'] as String? ?? 'KJV',
           listName: listName,
         );
         _scriptures.add(newScripture);
       } else {
         throw Exception('Failed to load scripture: ${response.statusCode}');
       }
-    }
-    catch (e, s) {
+    } catch (e, s) {
       AppLogger.e('Error fetching scripture', e, s);
       rethrow;
     }
@@ -67,4 +67,3 @@ final demoRepositoryProvider = Provider((ref) {
   final client = ref.watch(httpClientProvider);
   return DemoRepository(client);
 });
-
