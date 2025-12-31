@@ -1,22 +1,21 @@
 import 'dart:ui';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'firebase_options.dart';
+import 'services/analytics_manager.dart';
+import 'services/app_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    AnalyticsManager.instance.crashlytics.recordFlutterFatalError(errorDetails);
   };
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    AnalyticsManager.instance.crashlytics.recordError(error, stack, fatal: true);
     return true;
   };
   runApp(const MyApp());
@@ -37,9 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title});
-
-  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -70,91 +67,92 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _handleCounterEvent(int counterValue) async {
     switch (counterValue) {
       case 1:
-        await _sendAnalyticsEvent('counter_event_1', {'message': 'First push - analytics only'});
+        await AnalyticsManager.instance.logEvent('counter_event_1', {
+          'message': 'First push - analytics only',
+        });
         break;
       case 2:
-        await _sendAnalyticsEvent('counter_event_2', {'message': 'Second push - sending NFE'});
+        await AnalyticsManager.instance.logEvent('counter_event_2', {
+          'message': 'Second push - sending NFE',
+        });
         await _sendNonFatalException();
         break;
       case 3:
-        await _sendAnalyticsEvent('counter_event_3', {
+        await AnalyticsManager.instance.logEvent('counter_event_3', {
           'message': 'Third push - sending fatal crash',
         });
         await _sendFatalCrash();
         break;
       default:
-        await _sendAnalyticsEvent('counter_event_$counterValue', {
+        await AnalyticsManager.instance.logEvent('counter_event_$counterValue', {
           'message': 'Push #$counterValue - regular analytics',
         });
     }
   }
 
-  Future<void> _sendAnalyticsEvent(String eventName, Map<String, Object> parameters) async {
-    debugPrint('Sending analytics event: $eventName');
-    await widget.analytics.logEvent(name: eventName, parameters: parameters);
-    debugPrint('Analytics event sent: $eventName');
-  }
-
   Future<void> _sendNonFatalException() async {
-    debugPrint('Sending non-fatal exception to Crashlytics');
     try {
       throw Exception('Test non-fatal exception from counter event');
     } catch (error, stack) {
-      await FirebaseCrashlytics.instance.recordError(error, stack);
+      await AnalyticsManager.instance.recordNonFatalError(
+        error,
+        stack,
+        analyticsAttributes: {'source': 'counter_event'},
+      );
     }
-    debugPrint('Non-fatal exception sent to Crashlytics');
   }
 
   Future<void> _sendFatalCrash() async {
-    debugPrint('Sending fatal crash to Crashlytics');
     try {
       throw StateError('Test fatal crash from counter event');
     } catch (error, stack) {
-      await FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      await AnalyticsManager.instance.recordFatalError(
+        error,
+        stack,
+        analyticsAttributes: {'source': 'counter_event'},
+      );
     }
-    debugPrint('Fatal crash sent to Crashlytics');
   }
 
   void _forceCrash() {
-    debugPrint('Forcing fatal crash');
-    FirebaseCrashlytics.instance.crash();
+    AnalyticsManager.instance.forceCrash(analyticsAttributes: {'source': 'button'});
   }
 
   Future<void> _sendNFE() async {
-    debugPrint('Sending non-fatal exception from button');
     try {
       throw Exception('Test NFE from button');
     } catch (error, stack) {
-      await FirebaseCrashlytics.instance.recordError(error, stack);
+      await AnalyticsManager.instance.recordNonFatalError(
+        error,
+        stack,
+        analyticsAttributes: {'source': 'button'},
+      );
     }
-    debugPrint('NFE sent from button');
   }
 
   Future<void> _call404API() async {
-    debugPrint('Calling 404 API (typo URL)');
     try {
       final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/postsss'));
-      debugPrint('404 API response: ${response.statusCode}');
+      AppLogger.info('404 API response: ${response.statusCode}');
     } catch (error) {
-      debugPrint('404 API error: $error');
-      await FirebaseCrashlytics.instance.recordError(
-        '404 API call failed: $error',
-        StackTrace.current,
-      );
+      AppLogger.error('404 API call failed: $error', error, StackTrace.current, false, {
+        'source': 'button',
+        'error_type': 'http_404',
+        'url': 'https://jsonplaceholder.typicode.com/postsss',
+      });
     }
   }
 
   Future<void> _call500API() async {
-    debugPrint('Calling 500 API');
     try {
       final response = await http.get(Uri.parse('https://httpbin.org/status/500'));
-      debugPrint('500 API response: ${response.statusCode}');
+      AppLogger.info('500 API response: ${response.statusCode}');
     } catch (error) {
-      debugPrint('500 API error: $error');
-      await FirebaseCrashlytics.instance.recordError(
-        '500 API call failed: $error',
-        StackTrace.current,
-      );
+      AppLogger.error('500 API call failed: $error', error, StackTrace.current, false, {
+        'source': 'button',
+        'error_type': 'http_500',
+        'url': 'https://httpbin.org/status/500',
+      });
     }
   }
 
