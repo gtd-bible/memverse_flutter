@@ -1,13 +1,23 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'firebase_options.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'services/analytics_manager.dart';
+import 'services/app_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FlutterError.onError = (errorDetails) {
+    AnalyticsManager.instance.crashlytics.recordFlutterFatalError(errorDetails);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AnalyticsManager.instance.crashlytics.recordError(error, stack, fatal: true);
+    return true;
+  };
   runApp(const MyApp());
 }
 
@@ -19,34 +29,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title});
-
-  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
+  const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -68,32 +58,103 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      _sendAnalyticsEvent();
-      _counter++;
+      final newCounter = _counter + 1;
+      _counter = newCounter;
+      _handleCounterEvent(newCounter);
     });
   }
 
-   Future<void> _sendAnalyticsEvent() async {
-    // Only strings and numbers (longs & doubles for android, ints and doubles for iOS) are supported for GA custom event parameters:
-    // https://firebase.google.com/docs/reference/ios/firebaseanalytics/api/reference/Classes/FIRAnalytics#+logeventwithname:parameters:
-    // https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics#public-void-logevent-string-name,-bundle-params
-    debugPrint('Sending analytics event');
-    await widget.analytics.logEvent(
-      name: 'increment_test_event',
-      parameters: <String, Object>{
-        'string': 'string',
-        'int': 42,
-        'long': 12345678910,
-        'double': 42.0,
-        // Only strings and numbers (ints & doubles) are supported for GA custom event parameters:
-        // https://developers.google.com/analytics/devguides/collection/analyticsjs/custom-dims-mets#overview
-        'bool': true.toString(),
-      },
-    );
-    debugPrint('Analytics event sent');
-
+  Future<void> _handleCounterEvent(int counterValue) async {
+    switch (counterValue) {
+      case 1:
+        await AnalyticsManager.instance.logEvent('counter_event_1', {
+          'message': 'First push - analytics only',
+        });
+        break;
+      case 2:
+        await AnalyticsManager.instance.logEvent('counter_event_2', {
+          'message': 'Second push - sending NFE',
+        });
+        await _sendNonFatalException();
+        break;
+      case 3:
+        await AnalyticsManager.instance.logEvent('counter_event_3', {
+          'message': 'Third push - sending fatal crash',
+        });
+        await _sendFatalCrash();
+        break;
+      default:
+        await AnalyticsManager.instance.logEvent('counter_event_$counterValue', {
+          'message': 'Push #$counterValue - regular analytics',
+        });
+    }
   }
 
+  Future<void> _sendNonFatalException() async {
+    try {
+      throw Exception('Test non-fatal exception from counter event');
+    } catch (error, stack) {
+      await AnalyticsManager.instance.recordNonFatalError(
+        error,
+        stack,
+        analyticsAttributes: {'source': 'counter_event'},
+      );
+    }
+  }
+
+  Future<void> _sendFatalCrash() async {
+    try {
+      throw StateError('Test fatal crash from counter event');
+    } catch (error, stack) {
+      await AnalyticsManager.instance.recordFatalError(
+        error,
+        stack,
+        analyticsAttributes: {'source': 'counter_event'},
+      );
+    }
+  }
+
+  void _forceCrash() {
+    AnalyticsManager.instance.forceCrash(analyticsAttributes: {'source': 'button'});
+  }
+
+  Future<void> _sendNFE() async {
+    try {
+      throw Exception('Test NFE from button');
+    } catch (error, stack) {
+      await AnalyticsManager.instance.recordNonFatalError(
+        error,
+        stack,
+        analyticsAttributes: {'source': 'button'},
+      );
+    }
+  }
+
+  Future<void> _call404API() async {
+    try {
+      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/postsss'));
+      AppLogger.info('404 API response: ${response.statusCode}');
+    } catch (error) {
+      AppLogger.error('404 API call failed: $error', error, StackTrace.current, false, {
+        'source': 'button',
+        'error_type': 'http_404',
+        'url': 'https://jsonplaceholder.typicode.com/postsss',
+      });
+    }
+  }
+
+  Future<void> _call500API() async {
+    try {
+      final response = await http.get(Uri.parse('https://httpbin.org/status/500'));
+      AppLogger.info('500 API response: ${response.statusCode}');
+    } catch (error) {
+      AppLogger.error('500 API call failed: $error', error, StackTrace.current, false, {
+        'source': 'button',
+        'error_type': 'http_500',
+        'url': 'https://httpbin.org/status/500',
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,28 +177,40 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            // Column is also a layout widget. It takes a list of children and
+            // arranges them vertically. By default, it sizes itself to fit its
+            // children horizontally, and tries to be as tall as its parent.
+            //
+            // Column has various properties to control how it sizes itself and
+            // how it positions its children. Here we use mainAxisAlignment to
+            // center the children vertically; the main axis here is the vertical
+            // axis because Columns are vertical (the cross axis would be
+            // horizontal).
+            //
+            // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+            // action in the IDE, or press "p" in the console), to see the
+            // wireframe for each widget.
+            mainAxisAlignment: .center,
+            children: [
+              const Text('You have pushed the button this many times:'),
+              Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
+              const SizedBox(height: 32),
+              const Text('Test Buttons (Counter behavior):'),
+              const Text('1st push: analytics | 2nd push: NFE | 3rd push: crash'),
+              const SizedBox(height: 32),
+              const Text('Manual Test Buttons:'),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _forceCrash, child: const Text('Force Crash')),
+              const SizedBox(height: 8),
+              ElevatedButton(onPressed: _sendNFE, child: const Text('Send NFE')),
+              const SizedBox(height: 8),
+              ElevatedButton(onPressed: _call404API, child: const Text('Call 404 API')),
+              const SizedBox(height: 8),
+              ElevatedButton(onPressed: _call500API, child: const Text('Call 500 API')),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
