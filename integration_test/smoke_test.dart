@@ -1,8 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'package:memverse/firebase_options.dart';
 import 'package:memverse/services/analytics_manager.dart';
 import 'package:memverse/services/app_logger.dart';
 
