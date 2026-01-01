@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
 import 'package:mini_memverse/src/features/ref_quiz/widgets/verse_card.dart';
 import 'package:mini_memverse/src/features/ref_quiz/widgets/verse_reference_form.dart';
 import 'package:mini_memverse/src/features/verse/domain/verse.dart';
+
+// TODO: Implement proper localization (l10n) using flutter_localizations
+// Reference: https://docs.flutter.dev/ui/accessibility-and-internationalization/internationalization
 
 class QuestionSection extends HookConsumerWidget {
   const QuestionSection({
     required this.versesAsync,
     required this.currentVerseIndex,
-    required this.l10n,
     required this.answerController,
     required this.answerFocusNode,
     required this.hasSubmittedAnswer,
@@ -20,7 +21,6 @@ class QuestionSection extends HookConsumerWidget {
 
   final AsyncValue<List<Verse>> versesAsync;
   final int currentVerseIndex;
-  final AppLocalizations l10n;
   final TextEditingController answerController;
   final FocusNode answerFocusNode;
   final bool hasSubmittedAnswer;
@@ -32,9 +32,6 @@ class QuestionSection extends HookConsumerWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: <Widget>[
-      // Verse text container - allow a dynamic maxHeight (60% of screen) so
-      // long verses can be displayed fully without clipping. The card itself
-      // will size to its content up to this max.
       Flexible(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -42,7 +39,6 @@ class QuestionSection extends HookConsumerWidget {
             maxHeight: MediaQuery.of(context).size.height * 0.6,
           ),
           child: versesAsync.when(
-            // Render the verse card for the reference quiz (reference is hidden by design)
             data: (verses) => VerseCard(verse: verses[currentVerseIndex]),
             loading: () => const Center(child: CircularProgressIndicator.adaptive()),
             error: (error, stackTrace) => Center(
@@ -56,14 +52,10 @@ class QuestionSection extends HookConsumerWidget {
           ),
         ),
       ),
-
       const SizedBox(height: 16),
-
-      // Reference form
       versesAsync.maybeWhen(
         data: (verses) => VerseReferenceForm(
           expectedReference: verses[currentVerseIndex].reference,
-          l10n: l10n,
           answerController: answerController,
           answerFocusNode: answerFocusNode,
           hasSubmittedAnswer: hasSubmittedAnswer,

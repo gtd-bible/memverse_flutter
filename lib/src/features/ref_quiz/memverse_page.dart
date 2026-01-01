@@ -160,6 +160,8 @@ class MemversePage extends HookConsumerWidget {
         pastQuestions.value = [...pastQuestions.value, feedback];
 
         final detailedFeedback = isCorrect
+            ? 'Correct! $userAnswer matches $expectedReference'
+            : 'Incorrect. The answer was: $expectedReference';
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -204,7 +206,6 @@ class MemversePage extends HookConsumerWidget {
                       child: QuestionSection(
                         versesAsync: versesAsync,
                         currentVerseIndex: currentVerseIndex.value,
-                        l10n: l10n,
                         answerController: answerController,
                         answerFocusNode: answerFocusNode,
                         hasSubmittedAnswer: hasSubmittedAnswer.value,
@@ -213,7 +214,7 @@ class MemversePage extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    StatsAndHistorySection(l10n: l10n, pastQuestions: pastQuestions.value),
+                    StatsAndHistorySection(pastQuestions: pastQuestions.value),
                   ],
                 )
               : Row(
@@ -230,7 +231,6 @@ class MemversePage extends HookConsumerWidget {
                                 : 0,
                             orElse: () => 0,
                           ),
-                          l10n: l10n,
                           answerController: answerController,
                           answerFocusNode: answerFocusNode,
                           hasSubmittedAnswer: hasSubmittedAnswer.value,
@@ -240,9 +240,7 @@ class MemversePage extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
-                      child: StatsAndHistorySection(l10n: l10n, pastQuestions: pastQuestions.value),
-                    ),
+                    Expanded(child: StatsAndHistorySection(pastQuestions: pastQuestions.value)),
                   ],
                 ),
         ),

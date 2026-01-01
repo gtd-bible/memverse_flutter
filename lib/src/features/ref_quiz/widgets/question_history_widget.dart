@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
 
 class QuestionHistoryWidget extends StatelessWidget {
-  const QuestionHistoryWidget({required this.pastQuestions, required this.l10n, super.key});
+  const QuestionHistoryWidget({required this.pastQuestions, super.key});
 
   final List<String> pastQuestions;
-  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -17,9 +15,7 @@ class QuestionHistoryWidget extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text('History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Container(
           key: const Key('past-questions'),
@@ -27,8 +23,9 @@ class QuestionHistoryWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: pastQuestions.isEmpty
                 ? [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text('No questions yet', style: TextStyle(color: Colors.grey)),
                     ),
                   ]
                 : pastQuestions

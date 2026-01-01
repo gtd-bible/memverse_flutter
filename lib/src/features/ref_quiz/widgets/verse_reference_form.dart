@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
 
 class VerseReferenceForm extends HookWidget {
   const VerseReferenceForm({
     required this.expectedReference,
-    required this.l10n,
     required this.answerController,
     required this.answerFocusNode,
     required this.hasSubmittedAnswer,
@@ -15,7 +13,6 @@ class VerseReferenceForm extends HookWidget {
   });
 
   final String expectedReference;
-  final AppLocalizations l10n;
   final TextEditingController answerController;
   final FocusNode answerFocusNode;
   final bool hasSubmittedAnswer;
@@ -26,27 +23,22 @@ class VerseReferenceForm extends HookWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      // Reference label
       Container(
         padding: const EdgeInsets.only(bottom: 8),
       ),
-
-      // Reference input form
       TextField(
         controller: answerController,
         focusNode: answerFocusNode,
         decoration: _getInputDecoration(),
         onSubmitted: (_) => onSubmitAnswer(expectedReference),
       ),
-
       const SizedBox(height: 16),
-
-      // Submit button
       Align(
         alignment: Alignment.centerRight,
         child: ElevatedButton(
           key: const Key('submit-ref'),
           onPressed: () => onSubmitAnswer(expectedReference),
+          child: const Text('Submit'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             backgroundColor: Theme.of(context).primaryColor,
@@ -60,6 +52,12 @@ class VerseReferenceForm extends HookWidget {
   InputDecoration _getInputDecoration() {
     final showSuccessStyle = hasSubmittedAnswer && isAnswerCorrect;
     final showErrorStyle = hasSubmittedAnswer && !isAnswerCorrect;
+
+    final helperText = showSuccessStyle
+        ? 'Correct!'
+        : showErrorStyle
+        ? 'Incorrect'
+        : null;
 
     return InputDecoration(
       border: OutlineInputBorder(
@@ -92,8 +90,7 @@ class VerseReferenceForm extends HookWidget {
           width: 2,
         ),
       ),
-      helperText: showSuccessStyle
-          : showErrorStyle
+      helperText: helperText,
       helperStyle: TextStyle(
         color: showSuccessStyle
             ? Colors.green
