@@ -84,4 +84,5 @@ class DefaultFirebaseOptions {
     androidClientId: '633603071053-lbvakvfcfqd9dih67cq0o39ceigh0rif.apps.googleusercontent.com',
     iosBundleId: 'com.spiritflightapps.memverse',
   );
+
 }
