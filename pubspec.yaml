@@ -4,8 +4,8 @@ description: "Memverse flutter -mobile front end for memverse.com"
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.52.0+5200 # 0.52.0+5200 - 1-Jan-2026 iOS app Dist test
-
+version: 0.852.0+85200 # 0.52.0+5200 - 1-Jan-2026 iOS app Dist test
+# 0.852.0+85200 could be greater than Dec 2 legacy app if desired
 environment:
   sdk: 3.10.4
   flutter: 3.38.5
@@ -30,6 +30,29 @@ dependencies:
   http: 1.6.0
   logger: 2.6.2
   device_info_plus: 12.3.0
+  dio: 5.8.0+1
+  dio_curl_logger: ^1.2.0
+  feedback: 3.2.0
+  flutter_hooks: 0.21.2
+  flutter_riverpod: 2.6.1
+  flutter_secure_storage: 9.2.4
+  freezed_annotation: ^3.1.0
+  go_router: ^16.0.0
+  hooks_riverpod: ^2.6.1
+  intl: ^0.20.2
+  json_annotation: ^4.9.0
+  path_provider: 2.1.5
+  posthog_flutter: 5.0.0
+  riverpod_annotation: 2.6.1
+  retrofit: ^4.6.0
+  share_plus: 11.0.0
+  talker: 4.9.2
+  talker_dio_logger: 4.9.2
+  talker_flutter: 4.9.2
+  talker_riverpod_logger: 4.9.2
+
+  url_launcher: ^6.3.2
+
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +67,17 @@ dev_dependencies:
   mocktail: ^1.0.4
   integration_test:
     sdk: flutter
+
+  freezed: ^3.1.0
+
+  json_serializable: ^6.9.5
+  network_image_mock: ^2.1.1
+  path_provider_platform_interface: ^2.1.2
+  patrol: ^3.17.0
+  patrol_finders: ^2.8.2
+  plugin_platform_interface: ^2.1.8
+  retrofit_generator: ^9.7.0
+  riverpod_generator: ^2.6.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

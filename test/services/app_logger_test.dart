@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memverse/services/app_logger.dart';
+import 'package:mini_memverse/services/app_logger.dart';
 
 void main() {
   group('AppLogger - Class Existence', () {

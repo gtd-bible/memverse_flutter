@@ -1,16 +1,36 @@
-import 'dart:ui';
-
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:mini_memverse/services/app_logger.dart';
+import 'package:mini_memverse/src/app/view/app.dart';
+import 'package:mini_memverse/src/bootstrap.dart';
+import 'package:mini_memverse/src/common/services/analytics_bootstrap.dart';
+import 'package:mini_memverse/src/common/services/analytics_service.dart';
+import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 
 import 'firebase_options.dart';
 import 'services/analytics_manager.dart';
-import 'services/app_logger.dart';
 
-void main() async {
+String _getMemverseApiUrl() {
+  const environment = String.fromEnvironment('ENVIRONMENT', defaultValue: 'dev');
+  switch (environment) {
+    case 'prd':
+      return 'https://api.memverse.com';
+    case 'stg':
+      return 'https://api-stg.memverse.com';
+    case 'dev':
+    default:
+      return 'https://api-dev.memverse.com';
+  }
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set up Firebase error handlers
   FlutterError.onError = (errorDetails) {
     AnalyticsManager.instance.crashlytics.recordFlutterFatalError(errorDetails);
   };
@@ -18,206 +38,39 @@ void main() async {
     AnalyticsManager.instance.crashlytics.recordError(error, stack, fatal: true);
     return true;
   };
-  runApp(const MyApp());
+
+  const autoSignIn = bool.fromEnvironment('AUTOSIGNIN', defaultValue: true);
+
+  if (autoSignIn) {
+    AuthService.isDummyUser = true;
+  }
+
+  // Web-specific PostHog initialization is handled by analytics service
+  if (kIsWeb) {
+    AppLogger.i('Web platform detected - PostHog will be initialized by analytics service');
+  }
+
+  final apiUrl = _getMemverseApiUrl();
+  AppLogger.i('🌍 Using API URL: $apiUrl');
+  AppLogger.i(
+    '🏷️  Environment: ${const String.fromEnvironment('ENVIRONMENT', defaultValue: 'dev')}',
+  );
+  AppLogger.i(
+    '🔑 PostHog API Key available: ${const String.fromEnvironment('POSTHOG_MEMVERSE_API_KEY').isNotEmpty}',
+  );
+
+  // Initialize PostHog analytics (works alongside Firebase)
+  await AnalyticsBootstrap.initialize(entryPoint: AnalyticsEntryPoint.main);
+
+  // Initialize the app
+  await bootstrap(() => const MyHelloWorldApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      final newCounter = _counter + 1;
-      _counter = newCounter;
-      _handleCounterEvent(newCounter);
-    });
-  }
-
-  Future<void> _handleCounterEvent(int counterValue) async {
-    switch (counterValue) {
-      case 1:
-        await AnalyticsManager.instance.logEvent('counter_event_1', {
-          'message': 'First push - analytics only',
-        });
-        break;
-      case 2:
-        await AnalyticsManager.instance.logEvent('counter_event_2', {
-          'message': 'Second push - sending NFE',
-        });
-        await _sendNonFatalException();
-        break;
-      case 3:
-        await AnalyticsManager.instance.logEvent('counter_event_3', {
-          'message': 'Third push - sending fatal crash',
-        });
-        await _sendFatalCrash();
-        break;
-      default:
-        await AnalyticsManager.instance.logEvent('counter_event_$counterValue', {
-          'message': 'Push #$counterValue - regular analytics',
-        });
-    }
-  }
-
-  Future<void> _sendNonFatalException() async {
-    try {
-      throw Exception('Test non-fatal exception from counter event');
-    } catch (error, stack) {
-      await AnalyticsManager.instance.recordNonFatalError(
-        error,
-        stack,
-        analyticsAttributes: {'source': 'counter_event'},
-      );
-    }
-  }
-
-  Future<void> _sendFatalCrash() async {
-    try {
-      throw StateError('Test fatal crash from counter event');
-    } catch (error, stack) {
-      await AnalyticsManager.instance.recordFatalError(
-        error,
-        stack,
-        analyticsAttributes: {'source': 'counter_event'},
-      );
-    }
-  }
-
-  void _forceCrash() {
-    AnalyticsManager.instance.forceCrash(analyticsAttributes: {'source': 'button'});
-  }
-
-  Future<void> _sendNFE() async {
-    try {
-      throw Exception('Test NFE from button');
-    } catch (error, stack) {
-      await AnalyticsManager.instance.recordNonFatalError(
-        error,
-        stack,
-        analyticsAttributes: {'source': 'button'},
-      );
-    }
-  }
-
-  Future<void> _call404API() async {
-    try {
-      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/postsss'));
-      AppLogger.info('404 API response: ${response.statusCode}');
-    } catch (error) {
-      AppLogger.error('404 API call failed: $error', error, StackTrace.current, false, {
-        'source': 'button',
-        'error_type': 'http_404',
-        'url': 'https://jsonplaceholder.typicode.com/postsss',
-      });
-    }
-  }
-
-  Future<void> _call500API() async {
-    try {
-      final response = await http.get(Uri.parse('https://httpbin.org/status/500'));
-      AppLogger.info('500 API response: ${response.statusCode}');
-    } catch (error) {
-      AppLogger.error('500 API call failed: $error', error, StackTrace.current, false, {
-        'source': 'button',
-        'error_type': 'http_500',
-        'url': 'https://httpbin.org/status/500',
-      });
-    }
-  }
+class MyHelloWorldApp extends StatelessWidget {
+  const MyHelloWorldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: SingleChildScrollView(
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //
-            // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-            // action in the IDE, or press "p" in the console), to see the
-            // wireframe for each widget.
-            mainAxisAlignment: .center,
-            children: [
-              const Text('You have pushed the button this many times:'),
-              Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 32),
-              const Text('Test Buttons (Counter behavior):'),
-              const Text('1st push: analytics | 2nd push: NFE | 3rd push: crash'),
-              const SizedBox(height: 32),
-              const Text('Manual Test Buttons:'),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: _forceCrash, child: const Text('Force Crash')),
-              const SizedBox(height: 8),
-              ElevatedButton(onPressed: _sendNFE, child: const Text('Send NFE')),
-              const SizedBox(height: 8),
-              ElevatedButton(onPressed: _call404API, child: const Text('Call 404 API')),
-              const SizedBox(height: 8),
-              ElevatedButton(onPressed: _call500API, child: const Text('Call 500 API')),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+    return const App();
   }
 }

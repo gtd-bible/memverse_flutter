@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 import 'analytics_manager.dart';
@@ -15,10 +16,24 @@ class AppLogger {
     ),
   );
 
+  /// Log a trace level message (verbose)
+  static void t(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (kDebugMode) {
+      trace(message, error, stackTrace);
+    }
+  }
+
   /// Log a trace level message
   static void trace(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.t(message, error: error, stackTrace: stackTrace);
     AnalyticsManager.instance.crashlytics.log('[TRACE] $message');
+  }
+
+  /// Log a debug level message (short form)
+  static void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (kDebugMode) {
+      debug(message, error, stackTrace);
+    }
   }
 
   /// Log a debug level message
@@ -27,10 +42,24 @@ class AppLogger {
     AnalyticsManager.instance.crashlytics.log('[DEBUG] $message');
   }
 
+  /// Log an info level message (short form)
+  static void i(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (kDebugMode) {
+      info(message, error, stackTrace);
+    }
+  }
+
   /// Log an info level message
   static void info(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.i(message, error: error, stackTrace: stackTrace);
     AnalyticsManager.instance.crashlytics.log('[INFO] $message');
+  }
+
+  /// Log a warning level message (short form)
+  static void w(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (kDebugMode) {
+      warning(message, error, stackTrace);
+    }
   }
 
   /// Log a warning level message
@@ -44,8 +73,8 @@ class AppLogger {
   /// [recordToCrashlytics] - if true, the error will be recorded as a non-fatal error in Crashlytics
   /// [analyticsAttributes] - optional attributes to include in the analytics event
   static void error(
-    dynamic message,
-    dynamic error, [
+    dynamic message, [
+    dynamic error,
     StackTrace? stackTrace,
     bool recordToCrashlytics = true,
     Map<String, Object?>? analyticsAttributes,
@@ -61,6 +90,16 @@ class AppLogger {
         customParameters: {'message': message.toString()},
         analyticsAttributes: analyticsAttributes,
       );
+    }
+  }
+
+  static void e(dynamic message, [dynamic error, StackTrace? stackTrace]) =>
+      error(message, error, stackTrace, true);
+
+  /// Log a fatal error level message (short form)
+  static void f(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (kDebugMode) {
+      fatal(message, error, stackTrace);
     }
   }
 

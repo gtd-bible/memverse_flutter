@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:memverse/services/analytics_manager.dart';
-import 'package:memverse/services/app_logger.dart';
+import 'package:mini_memverse/services/analytics_manager.dart';
+import 'package:mini_memverse/services/app_logger.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
