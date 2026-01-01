@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:memverse/src/common/widgets/memverse_app_bar.dart';
-import 'package:memverse/src/constants/feature_flags.dart';
-import 'package:memverse/src/features/verse/presentation/providers/verse_providers.dart';
-import 'package:memverse/src/features/verse_text_quiz/widgets/quiz_rating_widget.dart';
+import 'package:mini_memverse/src/common/widgets/memverse_app_bar.dart';
+import 'package:mini_memverse/src/constants/feature_flags.dart';
+import 'package:mini_memverse/src/features/verse/presentation/providers/verse_providers.dart';
+import 'package:mini_memverse/src/features/verse_text_quiz/widgets/quiz_rating_widget.dart';
 
 class VerseTextQuizScreen extends ConsumerStatefulWidget {
   const VerseTextQuizScreen({super.key});

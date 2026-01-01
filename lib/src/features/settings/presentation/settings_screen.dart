@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:memverse/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:memverse/src/features/settings/presentation/analytics_provider.dart';
-import 'package:memverse/src/features/settings/presentation/theme_provider.dart';
+import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:mini_memverse/src/features/settings/presentation/analytics_provider.dart';
+import 'package:mini_memverse/src/features/settings/presentation/theme_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});

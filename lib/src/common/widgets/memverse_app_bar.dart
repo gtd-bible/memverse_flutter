@@ -1,8 +1,8 @@
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:memverse/src/common/services/analytics_service.dart';
-import 'package:memverse/src/constants/themes.dart';
+import 'package:mini_memverse/src/common/services/analytics_service.dart';
+import 'package:mini_memverse/src/constants/themes.dart';
 
 /// A reusable, branded AppBar for Memverse screens.
 /// - Shows 'Memverse' as the main title and accepts a [suffix] such as 'Ref', 'Verse', etc.

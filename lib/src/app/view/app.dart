@@ -14,25 +14,29 @@ late ProviderContainer container;
 Talker get talker => container.read(talkerProvider);
 
 class App extends ConsumerWidget {
+  static void initialize() {
+    container = ProviderContainer(overrides: []);
+  }
+
   const App({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
 
-    return UncontrolledProviderScope(
-      container: container,
-      child: Builder(
-        builder: (context) {
-          final isDarkMode =
-              themeMode == ThemeMode.dark ||
-              (themeMode == ThemeMode.system &&
-                  MediaQuery.of(context).platformBrightness == Brightness.dark);
+    return Builder(
+      builder: (context) {
+        final isDarkMode =
+            themeMode == ThemeMode.dark ||
+            (themeMode == ThemeMode.system &&
+                MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-          return BetterFeedback(
+        return UncontrolledProviderScope(
+          container: container,
+          child: BetterFeedback(
             theme: isDarkMode ? AppThemes.feedbackDarkTheme : AppThemes.feedbackTheme,
             child: TalkerWrapper(
-              talker: container.read(talkerProvider),
+              talker: talker,
               options: const TalkerWrapperOptions(enableErrorAlerts: true),
               child: MaterialApp(
                 theme: AppThemes.light,
@@ -41,9 +45,9 @@ class App extends ConsumerWidget {
                 home: AuthService.isDummyUser ? const SignedInNavScaffold() : const AuthWrapper(),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

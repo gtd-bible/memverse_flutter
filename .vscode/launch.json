@@ -1,0 +1,70 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Dev)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID:debug}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}",
+        "--dart-define=POSTHOG_MEMVERSE_API_KEY=${env:POSTHOG_MEMVERSE_API_KEY}",
+        "--dart-define=ENVIRONMENT=dev"
+      ],
+      "env": {
+        "FLUTTER_WEB_DEBUG": "true"
+      }
+    },
+    {
+      "name": "Flutter (Staging)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}",
+        "--dart-define=POSTHOG_MEMVERSE_API_KEY=${env:POSTHOG_MEMVERSE_API_KEY}",
+        "--dart-define=ENVIRONMENT=stg"
+      ]
+    },
+    {
+      "name": "Flutter (Production)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}",
+        "--dart-define=POSTHOG_MEMVERSE_API_KEY=${env:POSTHOG_MEMVERSE_API_KEY}",
+        "--dart-define=ENVIRONMENT=prd"
+      ]
+    },
+    {
+      "name": "Flutter (iOS)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}",
+        "--dart-define=POSTHOG_MEMVERSE_API_KEY=${env:POSTHOG_MEMVERSE_API_KEY}",
+        "--dart-define=ENVIRONMENT=dev"
+      ],
+      "deviceId": "ios"
+    },
+    {
+      "name": "Flutter (Android)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}",
+        "--dart-define=POSTHOG_MEMVERSE_API_KEY=${env:POSTHOG_MEMVERSE_API_KEY}",
+        "--dart-define=ENVIRONMENT=dev"
+      ],
+      "deviceId": "android"
+    }
+  ]
+}

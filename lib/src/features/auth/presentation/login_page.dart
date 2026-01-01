@@ -2,11 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:memverse/l10n/l10n.dart';
-import 'package:memverse/src/common/services/analytics_service.dart';
-import 'package:memverse/src/common/widgets/password_field.dart';
-import 'package:memverse/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:memverse/src/features/auth/presentation/signup_page.dart';
+import 'package:mini_memverse/src/common/services/analytics_service.dart';
+import 'package:mini_memverse/src/common/widgets/password_field.dart';
+import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:mini_memverse/src/features/auth/presentation/signup_page.dart';
+
+// TODO: Implement proper localization (l10n) using flutter_localizations
+// Reference: https://docs.flutter.dev/ui/accessibility-and-internationalization/internationalization
 
 // Key constants for Patrol tests
 const loginUsernameFieldKey = ValueKey('login_username_field');
@@ -26,7 +28,6 @@ class LoginPage extends HookConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final isPasswordVisible = useState(false);
     final analyticsService = ref.read(analyticsServiceProvider);
-    final l10n = context.l10n;
 
     // Track web page view for login page
     useEffect(() {
@@ -117,12 +118,14 @@ class LoginPage extends HookConsumerWidget {
                     key: loginUsernameFieldKey,
                     controller: usernameController,
                     decoration: InputDecoration(
-                      labelText: l10n.username,
+                      labelText:
+                          'Username', // TODO: Use l10n.username when localization is implemented
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.person),
                     ),
-                    validator: (value) =>
-                        value == null || value.isEmpty ? l10n.pleaseEnterYourUsername : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Please enter your username'
+                        : null, // TODO: Use l10n.pleaseEnterYourUsername
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(passwordFocusNode);
@@ -138,9 +141,11 @@ class LoginPage extends HookConsumerWidget {
                     fieldKey: loginPasswordFieldKey,
                     controller: passwordController,
                     focusNode: passwordFocusNode,
-                    labelText: l10n.password,
-                    validator: (value) =>
-                        value == null || value.isEmpty ? l10n.pleaseEnterYourPassword : null,
+                    labelText:
+                        'Password', // TODO: Use l10n.password when localization is implemented
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Please enter your password'
+                        : null, // TODO: Use l10n.pleaseEnterYourPassword
                     textInputAction: TextInputAction.go,
                     onFieldSubmitted: (_) async {
                       if (await validateFormWithAnalytics()) {
@@ -191,7 +196,10 @@ class LoginPage extends HookConsumerWidget {
                           },
                     child: authState.isLoading
                         ? const CircularProgressIndicator()
-                        : Text(l10n.login, style: const TextStyle(fontSize: 16)),
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(fontSize: 16),
+                          ), // TODO: Use l10n.login
                   ),
                 ),
                 const SizedBox(height: 16),

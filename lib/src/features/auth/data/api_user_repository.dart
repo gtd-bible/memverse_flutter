@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:mini_memverse/services/app_logger.dart';
-import 'package:memverse/src/common/interceptors/curl_logging_interceptor.dart';
-import 'package:memverse/src/features/auth/domain/user.dart';
-import 'package:memverse/src/features/auth/domain/user_repositoryogger.dart';
+import 'package:mini_memverse/src/common/interceptors/curl_logging_interceptor.dart';
+import 'package:mini_memverse/src/features/auth/domain/user.dart';
+import 'package:mini_memverse/src/features/auth/domain/user_repository.dart';
 
 // Data models for signup request
 class RegisterUserRequest {

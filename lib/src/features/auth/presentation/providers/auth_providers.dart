@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:memverse/src/common/providers/bootstrap_provider.dart';
-import 'package:memverse/src/common/services/analytics_service.dart';
-import 'package:memverse/src/features/auth/data/auth_service.dart';
-import 'package:memverse/src/features/auth/domain/auth_token.dart';
+import 'package:mini_memverse/src/common/providers/bootstrap_provider.dart';
+import 'package:mini_memverse/src/common/services/analytics_service.dart';
+import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
+import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
 import 'package:mini_memverse/services/app_logger.dart';
 
 /// Provider to check if user is logged in

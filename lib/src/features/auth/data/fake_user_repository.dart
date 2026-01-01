@@ -1,6 +1,6 @@
-import 'package:memverse/src/features/auth/data/fake_auth_data.dart';
-import 'package:memverse/src/features/auth/domain/user.dart';
-import 'package:memverse/src/features/auth/domain/user_repository.dart';
+import 'package:mini_memverse/src/features/auth/data/fake_auth_data.dart';
+import 'package:mini_memverse/src/features/auth/domain/user.dart';
+import 'package:mini_memverse/src/features/auth/domain/user_repository.dart';
 
 /// Fake user repository for testing
 /// Uses JSON literals similar to Square's MockWebServer approach

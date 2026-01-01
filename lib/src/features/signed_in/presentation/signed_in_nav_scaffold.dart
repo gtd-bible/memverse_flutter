@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:memverse/l10n/l10n.dart';
-import 'package:memverse/src/features/home/home_tab.dart';
-import 'package:memverse/src/features/ref_quiz/memverse_page.dart';
-import 'package:memverse/src/features/settings/presentation/settings_screen.dart';
-import 'package:memverse/src/features/verse_text_quiz/widgets/verse_text_quiz_screen.dart';
+import 'package:mini_memverse/src/features/home/home_tab.dart';
+import 'package:mini_memverse/src/features/ref_quiz/memverse_page.dart';
+import 'package:mini_memverse/src/features/settings/presentation/settings_screen.dart';
+import 'package:mini_memverse/src/features/verse_text_quiz/widgets/verse_text_quiz_screen.dart';
 
+// TODO: Implement proper localization (l10n) using flutter_localizations
+// Reference: https://docs.flutter.dev/ui/accessibility-and-internationalization/internationalization
 const _tabs = <Widget>[HomeTab(), VerseTextQuizScreen(), MemversePage(), SettingsScreen()];
 
 class SignedInNavScaffold extends HookWidget {
@@ -14,12 +15,12 @@ class SignedInNavScaffold extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = useState(1);
-    final l10n = context.l10n;
+    // TODO: Replace hardcoded strings with context.l10n.home, etc. when localization is implemented
     final navItems = <BottomNavigationBarItem>[
-      BottomNavigationBarItem(icon: const Icon(Icons.home), label: l10n.home),
-      BottomNavigationBarItem(icon: const Icon(Icons.menu_book_rounded), label: l10n.verse),
-      BottomNavigationBarItem(icon: const Icon(Icons.bookmarks_outlined), label: l10n.ref),
-      BottomNavigationBarItem(icon: const Icon(Icons.settings), label: l10n.settings),
+      const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+      const BottomNavigationBarItem(icon: Icon(Icons.menu_book_rounded), label: 'Verse'),
+      const BottomNavigationBarItem(icon: Icon(Icons.bookmarks_outlined), label: 'Ref Quiz'),
+      const BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
     ];
     return Scaffold(
       body: IndexedStack(index: selectedIndex.value, children: _tabs),

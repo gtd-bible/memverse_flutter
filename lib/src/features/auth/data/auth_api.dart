@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart' hide Headers;
-import 'package:memverse/src/features/auth/domain/auth_token.dart';
+import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'auth_api.g.dart';

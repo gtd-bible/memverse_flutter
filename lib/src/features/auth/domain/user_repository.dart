@@ -1,4 +1,4 @@
-import 'package:memverse/src/features/auth/domain/user.dart';
+import 'package:mini_memverse/src/features/auth/domain/user.dart';
 
 /// Repository interface for user operations
 abstract class UserRepository {

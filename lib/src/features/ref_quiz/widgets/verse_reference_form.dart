@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:memverse/l10n/arb/app_localizations.dart';
+// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
 
 class VerseReferenceForm extends HookWidget {
   const VerseReferenceForm({
@@ -29,7 +29,6 @@ class VerseReferenceForm extends HookWidget {
       // Reference label
       Container(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Text(l10n.reference, style: const TextStyle(fontSize: 18, color: Colors.black)),
       ),
 
       // Reference input form
@@ -53,7 +52,6 @@ class VerseReferenceForm extends HookWidget {
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
           ),
-          child: Text(l10n.submit),
         ),
       ),
     ],
@@ -94,12 +92,8 @@ class VerseReferenceForm extends HookWidget {
           width: 2,
         ),
       ),
-      hintText: l10n.enterReferenceHint,
       helperText: showSuccessStyle
-          ? l10n.correct
           : showErrorStyle
-          ? l10n.notQuiteRight(expectedReference)
-          : l10n.referenceFormat,
       helperStyle: TextStyle(
         color: showSuccessStyle
             ? Colors.green

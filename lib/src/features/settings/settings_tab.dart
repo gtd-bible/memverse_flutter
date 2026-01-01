@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memverse/src/common/widgets/memverse_app_bar.dart';
+import 'package:mini_memverse/src/common/widgets/memverse_app_bar.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});

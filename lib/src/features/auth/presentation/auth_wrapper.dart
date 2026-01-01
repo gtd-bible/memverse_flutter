@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:memverse/src/features/auth/data/auth_service.dart';
-import 'package:memverse/src/features/auth/presentation/login_page.dart';
-import 'package:memverse/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:memverse/src/features/signed_in/presentation/signed_in_nav_scaffold.dart';
+import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
+import 'package:mini_memverse/src/features/auth/presentation/login_page.dart';
+import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:mini_memverse/src/features/signed_in/presentation/signed_in_nav_scaffold.dart';
 
 class AuthWrapper extends HookConsumerWidget {
   const AuthWrapper({super.key});

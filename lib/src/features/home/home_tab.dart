@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:memverse/src/common/widgets/memverse_app_bar.dart';
+import 'package:mini_memverse/src/common/widgets/memverse_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const demoEmail = 'dummysigninuser@dummy.com';

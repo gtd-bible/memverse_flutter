@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:memverse/src/common/widgets/password_field.dart';
-import 'package:memverse/src/features/auth/data/user_repository_provider.dart';
+import 'package:mini_memverse/src/common/widgets/password_field.dart';
+import 'package:mini_memverse/src/features/auth/data/user_repository_provider.dart';
 import 'package:mini_memverse/services/app_logger.dart';
 
 // Key constants for Maestro tests

@@ -2,14 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:memverse/l10n/arb/app_localizations.dart';
-import 'package:memverse/src/common/services/analytics_service.dart';
-import 'package:memverse/src/common/widgets/memverse_app_bar.dart';
-import 'package:memverse/src/features/ref_quiz/widgets/question_section.dart';
-import 'package:memverse/src/features/ref_quiz/widgets/stats_and_history_section.dart';
-import 'package:memverse/src/features/verse/data/verse_repository.dart';
-import 'package:memverse/src/features/verse/domain/verse.dart';
-import 'package:memverse/src/features/verse/domain/verse_reference_validator.dart';
+// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
+import 'package:mini_memverse/src/common/services/analytics_service.dart';
+import 'package:mini_memverse/src/common/widgets/memverse_app_bar.dart';
+import 'package:mini_memverse/src/features/ref_quiz/widgets/question_section.dart';
+import 'package:mini_memverse/src/features/ref_quiz/widgets/stats_and_history_section.dart';
+import 'package:mini_memverse/src/features/verse/data/verse_repository.dart';
+import 'package:mini_memverse/src/features/verse/domain/verse.dart';
+import 'package:mini_memverse/src/features/verse/domain/verse_reference_validator.dart';
 
 // Key constants for Patrol tests
 const memversePageScaffoldKey = ValueKey('memverse_page_scaffold');
@@ -41,8 +41,6 @@ class MemversePage extends HookConsumerWidget {
     final isAnswerCorrect = useState(false);
     final pastQuestions = useState<List<String>>([]);
 
-    final l10n = AppLocalizations.of(context);
-    final pageTitle = l10n.referenceTest;
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
     final versesAsync = ref.watch(verseListProvider);
     final analyticsService = ref.read(analyticsServiceProvider);
@@ -99,7 +97,7 @@ class MemversePage extends HookConsumerWidget {
       if (answerController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.referenceCannotBeEmpty),
+            content: Text('Reference cannot be empty'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -162,8 +160,6 @@ class MemversePage extends HookConsumerWidget {
         pastQuestions.value = [...pastQuestions.value, feedback];
 
         final detailedFeedback = isCorrect
-            ? l10n.correctReferenceIdentification(expectedReference)
-            : l10n.notQuiteRight(expectedReference);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

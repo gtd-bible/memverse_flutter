@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memverse/l10n/arb/app_localizations.dart';
+// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
 
 class QuestionHistoryWidget extends StatelessWidget {
   const QuestionHistoryWidget({required this.pastQuestions, required this.l10n, super.key});
@@ -18,7 +18,6 @@ class QuestionHistoryWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          l10n.priorQuestions,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -30,7 +29,6 @@ class QuestionHistoryWidget extends StatelessWidget {
                 ? [
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(l10n.noPreviousQuestions),
                     ),
                   ]
                 : pastQuestions

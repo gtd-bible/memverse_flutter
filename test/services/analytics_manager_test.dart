@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memverse/services/analytics_manager.dart';
+import 'package:mini_memverse/services/analytics_manager.dart';
 
 void main() {
   group('AnalyticsManager Singleton', () {

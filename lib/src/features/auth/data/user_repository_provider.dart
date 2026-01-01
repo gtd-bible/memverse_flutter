@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:memverse/src/features/auth/data/api_user_repository.dart';
-import 'package:memverse/src/features/auth/data/fake_user_repository.dart';
-import 'package:memverse/src/features/auth/domain/user_repository.dart';
+import 'package:mini_memverse/src/features/auth/data/api_user_repository.dart';
+import 'package:mini_memverse/src/features/auth/data/fake_user_repository.dart';
+import 'package:mini_memverse/src/features/auth/domain/user_repository.dart';
 
 /// Provider for UserRepository
 /// In production, it provides ApiUserRepository.

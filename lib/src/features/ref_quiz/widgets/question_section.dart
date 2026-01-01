@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:memverse/l10n/arb/app_localizations.dart';
-import 'package:memverse/src/features/ref_quiz/widgets/verse_card.dart';
-import 'package:memverse/src/features/ref_quiz/widgets/verse_reference_form.dart';
-import 'package:memverse/src/features/verse/domain/verse.dart';
+// TODO: Add l10n import when localization is implemented/arb/app_localizations.dart';
+import 'package:mini_memverse/src/features/ref_quiz/widgets/verse_card.dart';
+import 'package:mini_memverse/src/features/ref_quiz/widgets/verse_reference_form.dart';
+import 'package:mini_memverse/src/features/verse/domain/verse.dart';
 
 class QuestionSection extends HookConsumerWidget {
   const QuestionSection({

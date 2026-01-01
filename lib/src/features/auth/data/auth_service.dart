@@ -4,10 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mini_memverse/services/app_logger.dart';
-import 'package:memverse/src/common/interceptors/curl_logging_interceptor.dart';
-import 'package:memverse/src/constants/api_constants.dart';
-import 'package:memverse/src/features/auth/data/auth_api.dart';
-import 'package:memverse/src/features/auth/domain/auth_tokenogger.dart';
+import 'package:mini_memverse/src/common/interceptors/curl_logging_interceptor.dart';
+import 'package:mini_memverse/src/constants/api_constants.dart';
+import 'package:mini_memverse/src/features/auth/data/auth_api.dart';
+import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
 
 const String clientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
 

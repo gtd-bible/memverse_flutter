@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memverse/src/features/verse/domain/verse.dart';
+import 'package:mini_memverse/src/features/verse/domain/verse.dart';
 
 class VerseCard extends StatelessWidget {
   // This card is used by the reference-quiz feature. The reference is intentionally
