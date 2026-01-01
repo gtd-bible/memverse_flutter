@@ -261,7 +261,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Firebase: a451a7b61536298fd5cbfe3a746fd40443a50679
   firebase_analytics: 4f9cca09e65f6c2944a862c6dc86f6bed9fb769c
   firebase_core: ba00a168e719694f38960502ceb560285603d073
