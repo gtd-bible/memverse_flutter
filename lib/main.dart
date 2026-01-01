@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/app/view/app.dart';
 import 'package:mini_memverse/src/bootstrap.dart';
-import 'package:mini_memverse/src/common/services/analytics_bootstrap.dart';
-import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 
 import 'firebase_options.dart';
@@ -113,15 +111,9 @@ Future<void> main() async {
 
   // Logging initialization
   AppLogger.i('🌍 Using API URL: https://www.memverse.com');
-  AppLogger.i(
-    '🔑 PostHog API Key available: ${const String.fromEnvironment('POSTHOG_MEMVERSE_API_KEY').isNotEmpty}',
-  );
-  if (kDebugMode) {
-    AppLogger.i('🐛 Running in debug mode');
-  }
+  AppLogger.i('🔑 Firebase Analytics initialized');
 
-  // Initialize PostHog analytics (works alongside Firebase)
-  await AnalyticsBootstrap.initialize(entryPoint: AnalyticsEntryPoint.main);
+  // Note: Using Firebase Analytics only (PostHog removed to simplify)
 
   // Initialize the app
   await bootstrap(() => const MyHelloWorldApp());

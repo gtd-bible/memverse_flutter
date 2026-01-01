@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/constants/api_constants.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mini_memverse/src/features/verse/domain/verse.dart';
-import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/utils/test_utils.dart';
 
 // More reliable test detection
@@ -185,7 +185,7 @@ class LiveVerseRepository implements VerseRepository {
 
         // Track successful API call
         try {
-          final analyticsService = PostHogAnalyticsService();
+          final analyticsService = FirebaseAnalyticsService();
           await analyticsService.trackVerseApiSuccess(verses.length, stopwatch.elapsedMilliseconds);
           AppLogger.i(
             '📊 Tracked verse API success: ${verses.length} verses, ${stopwatch.elapsedMilliseconds}ms',
@@ -203,7 +203,7 @@ class LiveVerseRepository implements VerseRepository {
 
       // Track failed API call
       try {
-        final analyticsService = PostHogAnalyticsService();
+        final analyticsService = FirebaseAnalyticsService();
         var errorType = 'unknown_error';
         if (e is DioException) {
           errorType = e.type.toString();

@@ -207,11 +207,6 @@ PODS:
     - CocoaAsyncSocket (~> 7.6)
     - Flutter
     - FlutterMacOS
-  - PostHog (3.36.2)
-  - posthog_flutter (0.0.1):
-    - Flutter
-    - FlutterMacOS
-    - PostHog (~> 3.22)
   - PromisesObjC (2.4.0)
   - PromisesSwift (2.4.0):
     - PromisesObjC (= 2.4.0)
@@ -234,7 +229,6 @@ DEPENDENCIES:
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - patrol (from `.symlinks/plugins/patrol/darwin`)
-  - posthog_flutter (from `.symlinks/plugins/posthog_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
@@ -261,7 +255,6 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleUtilities
     - nanopb
-    - PostHog
     - PromisesObjC
     - PromisesSwift
 
@@ -292,8 +285,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   patrol:
     :path: ".symlinks/plugins/patrol/darwin"
-  posthog_flutter:
-    :path: ".symlinks/plugins/posthog_flutter/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   url_launcher_ios:
@@ -334,8 +325,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   patrol: 5df5d241d7f95f0df12a6906bbf45acb43a1e537
-  PostHog: 43ba4f42cc8dda909b33033e9ba0a1f64a2a8eb2
-  posthog_flutter: 631ab870f7daf1ed190deeb2414eb3e347445f37
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
