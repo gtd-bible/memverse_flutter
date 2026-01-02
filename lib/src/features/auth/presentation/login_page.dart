@@ -29,14 +29,6 @@ class LoginPage extends HookConsumerWidget {
     final isPasswordVisible = useState(false);
     final analyticsService = ref.read(analyticsServiceProvider);
 
-    // Track web page view for login page
-    useEffect(() {
-      if (kIsWeb) {
-        analyticsService.trackWebPageView('login_page');
-      }
-      return null;
-    }, const []);
-
     // Function to validate form and track validation failures
     Future<bool> validateFormWithAnalytics() async {
       var isValid = true;
@@ -87,7 +79,7 @@ class LoginPage extends HookConsumerWidget {
                             'Memverse',
                             style: TextStyle(
                               fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: .bold,
                               color: Colors.white,
                               letterSpacing: 1.5,
                             ),
@@ -100,14 +92,14 @@ class LoginPage extends HookConsumerWidget {
                 const SizedBox(height: 32),
                 const Text(
                   'Welcome to Memverse',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24, fontWeight: .bold),
+                  textAlign: .center,
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'Sign in to continue',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
-                  textAlign: TextAlign.center,
+                  textAlign: .center,
                 ),
                 const SizedBox(height: 32),
                 Semantics(
@@ -160,22 +152,18 @@ class LoginPage extends HookConsumerWidget {
                 ),
                 if (kDebugMode)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                    padding: const .symmetric(vertical: 12, horizontal: 6),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.lightGreen[50],
                         borderRadius: BorderRadius.circular(7),
-                        border: Border.all(color: Colors.green.shade100, width: 0.8),
+                        border: .all(color: Colors.green.shade100, width: 0.8),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      padding: const .symmetric(vertical: 10, horizontal: 16),
                       child: const Text(
                         'Development Demo:\nTo skip sign-in and view a full mock UI, copy & paste:\n\nEmail: dummysigninuser@dummy.com\nPassword: (any)\nThen tap Sign in.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.green,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14, color: Colors.green, fontWeight: .w600),
+                        textAlign: .center,
                       ),
                     ),
                   ),
@@ -207,7 +195,7 @@ class LoginPage extends HookConsumerWidget {
                   Text(
                     authState.error!,
                     style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+                    textAlign: .center,
                   ),
                 const SizedBox(height: 24),
                 // Sign Up link
@@ -221,7 +209,7 @@ class LoginPage extends HookConsumerWidget {
                           context,
                         ).push(MaterialPageRoute(builder: (context) => const SignupPage()));
                       },
-                      child: const Text('Sign Up', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: const Text('Sign Up', style: TextStyle(fontWeight: .bold)),
                     ),
                   ],
                 ),

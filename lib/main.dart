@@ -2,9 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mini_memverse/services/app_logger.dart';
-import 'package:mini_memverse/src/app/view/app.dart';
+import 'package:mini_memverse/src/app/app.dart';
 import 'package:mini_memverse/src/bootstrap.dart';
-import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 
 import 'firebase_options.dart';
 import 'services/analytics_manager.dart';
@@ -63,20 +62,22 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Check for required environment variables
-  var clientId = const String.fromEnvironment('CLIENT_ID');
-  if (clientId.isEmpty && kDebugMode) {
-    clientId = 'debug';
+  var memverseClientId = const String.fromEnvironment('MEMVERSE_CLIENT_ID');
+  if (kDebugMode) {
+    debugPrint('MEMVERSE_CLIENT_ID=$memverseClientId');
   }
-
-  if (clientId.isEmpty) {
+  if (memverseClientId.isEmpty) {
     runApp(
       const ConfigurationErrorWidget(
         error:
-            'Missing required CLIENT_ID configuration for authentication.\n\n'
+            'Missing required MEMVERSE_CLIENT_ID configuration for authentication.\n\n'
             'Please set MEMVERSE_CLIENT_ID in your shell environment.',
       ),
     );
     return;
+  } else {
+    debugPrint('MEMVERSE_CLIENT_ID has ${memverseClientId.length} characters');
+    // do somethijng with clientid
   }
 
   const clientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
@@ -103,12 +104,6 @@ Future<void> main() async {
     return true;
   };
 
-  const autoSignIn = bool.fromEnvironment('AUTOSIGNIN', defaultValue: true);
-
-  if (autoSignIn) {
-    AuthService.isDummyUser = true;
-  }
-
   // Logging initialization
   AppLogger.i('🌍 Using API URL: https://www.memverse.com');
   AppLogger.i('🔑 Firebase Analytics initialized');
@@ -116,14 +111,5 @@ Future<void> main() async {
   // Note: Using Firebase Analytics only (PostHog removed to simplify)
 
   // Initialize the app
-  await bootstrap(() => const MyHelloWorldApp());
-}
-
-class MyHelloWorldApp extends StatelessWidget {
-  const MyHelloWorldApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const App();
-  }
+  await bootstrap(() => const App());
 }

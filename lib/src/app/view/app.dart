@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';
 import 'package:mini_memverse/src/constants/themes.dart';
-import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 import 'package:mini_memverse/src/features/auth/presentation/auth_wrapper.dart';
 import 'package:mini_memverse/src/features/settings/presentation/theme_provider.dart';
-import 'package:mini_memverse/src/features/signed_in/presentation/signed_in_nav_scaffold.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 late ProviderContainer container;
@@ -42,7 +40,7 @@ class App extends ConsumerWidget {
                 theme: AppThemes.light,
                 darkTheme: AppThemes.dark,
                 themeMode: themeMode,
-                home: AuthService.isDummyUser ? const SignedInNavScaffold() : const AuthWrapper(),
+                home: const AuthWrapper(),
               ),
             ),
           ),

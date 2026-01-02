@@ -1,11 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mini_memverse/src/common/widgets/memverse_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-const demoEmail = 'dummysigninuser@dummy.com';
-const demoPass = 'any-password';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -27,7 +22,7 @@ class HomeTab extends StatelessWidget {
                     Text('Welcome to Memverse!', style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 16),
                     const Text(
-                      'Memverse uses spaced repetition—a proven technique that helps you memorize and retain scripture for the long term. ',
+                      'Memverse uses spaced repetition—a proven technique that helps you memorize and retain scripture for the long term.',
                     ),
                     const SizedBox(height: 14),
                     SingleChildScrollView(
@@ -59,78 +54,6 @@ class HomeTab extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 22),
-                    if (kDebugMode)
-                      Card(
-                        color: Colors.amber.shade50,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.amber.shade200),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.bug_report, color: Colors.orange),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Debug Mode Only',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelLarge?.copyWith(color: Colors.orange.shade800),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Demo Sign-In/Sign-Up Accounts:',
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
-                              const SizedBox(height: 7),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    const SelectableText(
-                                      'Username: ',
-                                      style: TextStyle(fontWeight: FontWeight.w500),
-                                    ),
-                                    const SelectableText(demoEmail),
-                                    IconButton(
-                                      tooltip: 'Copy email',
-                                      onPressed: () =>
-                                          Clipboard.setData(const ClipboardData(text: demoEmail)),
-                                      icon: const Icon(Icons.copy, size: 18),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    const SelectableText(
-                                      'Password: ',
-                                      style: TextStyle(fontWeight: FontWeight.w500),
-                                    ),
-                                    const SelectableText(demoPass),
-                                    IconButton(
-                                      tooltip: 'Copy password',
-                                      onPressed: () =>
-                                          Clipboard.setData(const ClipboardData(text: demoPass)),
-                                      icon: const Icon(Icons.copy, size: 18),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     const Spacer(),
                   ],
                 ),

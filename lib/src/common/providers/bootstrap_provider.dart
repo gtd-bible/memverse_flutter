@@ -12,15 +12,15 @@ class BootstrapValues {
 /// Provider for bootstrap values
 final bootstrapProvider = Provider<BootstrapValues>((ref) {
   // Get the CLIENT_ID from dart-define
-  const clientId = String.fromEnvironment('CLIENT_ID');
+  const memVerseClientId = String.fromEnvironment('MEMVERSE_CLIENT_ID');
 
   // Validate that the CLIENT_ID is provided
-  if (clientId.isEmpty) {
+  if (memVerseClientId.isEmpty) {
     throw Exception(
       'CLIENT_ID environment variable is not defined. '
       'Please run with --dart-define=CLIENT_ID=your_client_id',
     );
   }
 
-  return const BootstrapValues(clientId: clientId);
+  return const BootstrapValues(clientId: memVerseClientId);
 });

@@ -14,17 +14,18 @@ class SignedInNavScaffold extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = useState(1);
+    final selectedIndex = useState(1); // Start on Verse tab
     // TODO: Replace hardcoded strings with context.l10n.home, etc. when localization is implemented
     final navItems = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-      const BottomNavigationBarItem(icon: Icon(Icons.menu_book_rounded), label: 'Verse'),
+      const BottomNavigationBarItem(icon: Icon(Icons.menu_book_rounded), label: 'Verse Quiz'),
       const BottomNavigationBarItem(icon: Icon(Icons.bookmarks_outlined), label: 'Ref Quiz'),
       const BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
     ];
     return Scaffold(
       body: IndexedStack(index: selectedIndex.value, children: _tabs),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: navItems,
         currentIndex: selectedIndex.value,
         onTap: (index) => selectedIndex.value = index,

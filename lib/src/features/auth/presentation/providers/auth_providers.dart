@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/common/providers/bootstrap_provider.dart';
 import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
-import 'package:mini_memverse/services/app_logger.dart';
 
 /// Provider to check if user is logged in
 final isLoggedInProvider = FutureProvider<bool>((ref) async {
@@ -91,7 +91,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = state.copyWith(isLoading: true);
 
-      AppLogger.i('Attempting login with client ID present: ${_clientId.isNotEmpty}');
+      AppLogger.i('***Attempting login with client ID present: ${_clientId.isNotEmpty}');
       final token = await _authService.login(username, password, _clientId);
 
       // Log token information (non-sensitive parts)

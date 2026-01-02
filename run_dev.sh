@@ -28,6 +28,5 @@ fi
 
 # Run Flutter with environment variables
 flutter run \
-  --dart-define=CLIENT_ID=$CLIENT_ID \
-  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY \
-  "$@"
+  --dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID \
+  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY
