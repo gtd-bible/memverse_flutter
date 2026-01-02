@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/common/providers/bootstrap_provider.dart';
@@ -96,14 +95,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       // Log token information (non-sensitive parts)
       if (token.accessToken.isNotEmpty) {
-        // Only log in debug mode
-        if (kDebugMode) {
-          AppLogger.d('Successfully authenticated');
-        }
         AppLogger.i('Successfully authenticated');
 
         // Track successful login
         await _analyticsService.trackLogin(username);
+      } else {
+        AppLogger.i('Authentication failed by access token not being present');
       }
 
       state = state.copyWith(isAuthenticated: true, isLoading: false, token: token);

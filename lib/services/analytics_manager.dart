@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // Import for @visibleForTesting
 
 /// Wrapper/manager for Analytics and Crashlytics
 /// Handles both analytics events and crash reporting with automatic correlation
 class AnalyticsManager {
   static AnalyticsManager? _instance;
+  // Make the setter for _instance visible for testing purposes
+  @visibleForTesting
+  static set instance(AnalyticsManager? value) => _instance = value;
   static AnalyticsManager get instance => _instance ??= AnalyticsManager._();
 
   AnalyticsManager._() {

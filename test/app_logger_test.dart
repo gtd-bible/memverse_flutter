@@ -4,20 +4,16 @@ import 'package:mini_memverse/services/analytics_manager.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:logger/logger.dart';
+import 'package:flutter/foundation.dart'; // Import for kDebugMode
 
-// Mocks for Firebase dependencies
+// Mocks for dependencies
 class MockFirebaseCrashlytics extends Mock implements FirebaseCrashlytics {}
 class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
-class MockAndroidDeviceInfo extends Mock implements AndroidDeviceInfo {}
-class MockIosDeviceInfo extends Mock implements IosDeviceInfo {}
-class MockWebBrowserInfo extends Mock implements WebBrowserInfo {}
-class MockDeviceInfoPlugin extends Mock implements DeviceInfoPlugin {}
+class MockLogger extends Mock implements Logger {}
 
-// Mock for AnalyticsManager (to control its Firebase dependencies)
+// Mock for AnalyticsManager
 class MockAnalyticsManager extends Mock implements AnalyticsManager {
-  // We need to override the getters for analytics and crashlytics
-  // These will return our specific mocks
   @override
   final FirebaseAnalytics analytics;
   @override
@@ -44,63 +40,88 @@ class MockAnalyticsManager extends Mock implements AnalyticsManager {
     Map<String, Object?>? analyticsAttributes,
   }) async => Future.value();
 
-  // Since AnalyticsManager's constructor calls _initializeUserProperties,
-  // we need to mock that behavior or prevent it from running the real logic.
-  // The simplest is to ensure the mocks are already set when its called.
-  // But since we are mocking the *instance* of AnalyticsManager, its constructor won't run.
+  @override
+  Future<void> logEvent(String eventName, Map<String, Object?>? parameters) async => Future.value();
 }
 
 void main() {
   late MockFirebaseCrashlytics mockCrashlytics;
   late MockFirebaseAnalytics mockAnalytics;
   late MockAnalyticsManager mockAnalyticsManager;
+  late MockLogger mockLogger;
 
-  // Register fallbacks for `any()` if needed for methods with non-nullable parameters
+  // Store original instances globally to restore later
+  late Logger originalAppLogger;
+  late AnalyticsManager originalAnalyticsManager;
+
   setUpAll(() {
     registerFallbackValue(StackTrace.empty);
-  });
+    registerFallbackValue(<Object>[]); // Fallback for Iterable<Object>
+    registerFallbackValue(<String, Object?>{}); // Fallback for Map<String, Object?>
+    registerFallbackValue(''); // Fallback for String (for log message)
+    registerFallbackValue(null); // Fallback for dynamic/nullable error/stacktrace
 
-  setUp(() {
+    // Initialize mocks
     mockCrashlytics = MockFirebaseCrashlytics();
     mockAnalytics = MockFirebaseAnalytics();
-
-    // Stub methods called by AppLogger and AnalyticsManager
-    when(() => mockCrashlytics.log(any())).thenAnswer((_) async {});
-    when(() => mockCrashlytics.recordError(
-          any(),
-          any(),
-          fatal: any(named: 'fatal'),
-          information: any(named: 'information'),
-        )).thenAnswer((_) async {});
-    when(() => mockAnalytics.logEvent(name: any(named: 'name'), parameters: any(named: 'parameters'))).thenAnswer((_) async {});
-    when(() => mockAnalytics.setUserProperty(name: any(named: 'name'), value: any(named: 'value'))).thenAnswer((_) async {});
-
-    // Create a mock AnalyticsManager that returns our mock Firebase instances
+    mockLogger = MockLogger();
     mockAnalyticsManager = MockAnalyticsManager(
       analytics: mockAnalytics,
       crashlytics: mockCrashlytics,
     );
 
-    // Replace the global singleton instance for testing
-    // Store the original instance to restore it after the test
-    final originalAnalyticsManagerInstance = AnalyticsManager.instance;
+    // Save original instances (if they were already initialized)
+    originalAppLogger = AppLogger.logger;
+    originalAnalyticsManager = AnalyticsManager.instance; // This might trigger the real constructor
+
+    // Inject mocks as early as possible (before any test runs)
+    AppLogger.logger = mockLogger;
     AnalyticsManager.instance = mockAnalyticsManager;
 
-    // Restore the original instance after each test
-    addTearDown(() {
-      AnalyticsManager.instance = originalAnalyticsManagerInstance;
-    });
+    // Stub FirebaseCrashlytics methods
+    when(() => mockCrashlytics.log(any())).thenAnswer((_) async => Future.value());
+    when(() => mockCrashlytics.recordError(
+          any(),
+          any(),
+          fatal: any(named: 'fatal'),
+          information: any(named: 'information'),
+        )).thenAnswer((_) async => Future.value());
+
+    // Stub FirebaseAnalytics methods
+    when(() => mockAnalytics.logEvent(name: any(named: 'name'), parameters: any(named: 'parameters'))).thenAnswer((_) async => Future.value());
+    when(() => mockAnalytics.setUserProperty(name: any(named: 'name'), value: any(named: 'value'))).thenAnswer((_) async => Future.value());
+
+    // Stub Logger methods (all levels)
+    when(() => mockLogger.t(any(), error: any(named: 'error'), stackTrace: any(named: 'stackTrace'))).thenAnswer((_) {});
+    when(() => mockLogger.d(any(), error: any(named: 'error'), stackTrace: any(named: 'stackTrace'))).thenAnswer((_) {});
+    when(() => mockLogger.i(any(), error: any(named: 'error'), stackTrace: any(named: 'stackTrace'))).thenAnswer((_) {});
+    when(() => mockLogger.w(any(), error: any(named: 'error'), stackTrace: any(named: 'stackTrace'))).thenAnswer((_) {});
+    when(() => mockLogger.e(any(), error: any(named: 'error'), stackTrace: any(named: 'stackTrace'))).thenAnswer((_) {});
+    when(() => mockLogger.f(any(), error: any(named: 'error'), stackTrace: any(named: 'stackTrace'))).thenAnswer((_) {});
+  });
+
+  tearDownAll(() {
+    // Restore original instances after all tests are done
+    AppLogger.logger = originalAppLogger;
+    AnalyticsManager.instance = originalAnalyticsManager;
   });
 
   group('AppLogger Tests', () {
     test('AppLogger should have all logging methods', () {
-      expect(() => AppLogger.t('test'), returnsNormally);
-      expect(() => AppLogger.d('test'), returnsNormally);
-      expect(() => AppLogger.i('test'), returnsNormally);
-      expect(() => AppLogger.w('test'), returnsNormally);
-      expect(() => AppLogger.e('test'), returnsNormally);
+      AppLogger.t('test');
+      AppLogger.d('test');
+      AppLogger.i('test');
+      AppLogger.w('test');
+      AppLogger.e('test');
 
-      // Verify that the underlying crashlytics.log was called for each log level
+      // Verify that the underlying mockLogger was called
+      verify(() => mockLogger.t('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.d('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.i('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.w('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.e('test', error: null, stackTrace: null)).called(1);
+
+      // Verify that the underlying mockCrashlytics.log was called
       verify(() => mockCrashlytics.log('[TRACE] test')).called(1);
       verify(() => mockCrashlytics.log('[DEBUG] test')).called(1);
       verify(() => mockCrashlytics.log('[INFO] test')).called(1);
@@ -109,12 +130,18 @@ void main() {
     });
 
     test('AppLogger short form methods should exist', () {
-      expect(() => AppLogger.debug('test'), returnsNormally);
-      expect(() => AppLogger.info('test'), returnsNormally);
-      expect(() => AppLogger.warning('test'), returnsNormally);
-      expect(() => AppLogger.f('test'), returnsNormally);
+      AppLogger.debug('test');
+      AppLogger.info('test');
+      AppLogger.warning('test');
+      AppLogger.f('test');
 
-      // Verify that the underlying crashlytics.log was called for each log level
+      // Verify that the underlying mockLogger was called
+      verify(() => mockLogger.d('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.i('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.w('test', error: null, stackTrace: null)).called(1);
+      verify(() => mockLogger.f('test', error: null, stackTrace: null)).called(1);
+
+      // Verify that the underlying mockCrashlytics.log was called
       verify(() => mockCrashlytics.log('[DEBUG] test')).called(1);
       verify(() => mockCrashlytics.log('[INFO] test')).called(1);
       verify(() => mockCrashlytics.log('[WARNING] test')).called(1);
@@ -124,36 +151,30 @@ void main() {
     test('AppLogger.error should record non-fatal error to Crashlytics and Analytics', () async {
       final error = Exception('Test Error');
       final stackTrace = StackTrace.current;
-      AppLogger.error(error.toString(), error, stackTrace, true); // Removed await
+      AppLogger.error(error.toString(), error, stackTrace, true);
 
+      verify(() => mockLogger.e(error.toString(), error: error, stackTrace: stackTrace)).called(1);
       verify(() => mockCrashlytics.log('[ERROR] ${error.toString()}')).called(1);
-      verify(() => mockCrashlytics.recordError(
+      verify(() => mockAnalyticsManager.recordNonFatalError(
             error,
             stackTrace,
-            fatal: false,
-            information: any(named: 'information'),
-          )).called(1);
-      verify(() => mockAnalytics.logEvent(
-            name: 'non_fatal_error',
-            parameters: any(named: 'parameters'),
+            customParameters: any(), // Corrected named argument matching
+            analyticsAttributes: any(), // Corrected named argument matching
           )).called(1);
     });
 
     test('AppLogger.fatal should record fatal error to Crashlytics and Analytics', () async {
       final error = Exception('Fatal Error');
       final stackTrace = StackTrace.current;
-      AppLogger.fatal(error.toString(), error, stackTrace); // Removed await
+      AppLogger.fatal(error.toString(), error, stackTrace);
 
+      verify(() => mockLogger.f(error.toString(), error: error, stackTrace: stackTrace)).called(1);
       verify(() => mockCrashlytics.log('[FATAL] ${error.toString()}')).called(1);
-      verify(() => mockCrashlytics.recordError(
+      verify(() => mockAnalyticsManager.recordFatalError(
             error,
             stackTrace,
-            fatal: true,
-            information: any(named: 'information'),
-          )).called(1);
-      verify(() => mockAnalytics.logEvent(
-            name: 'fatal_error',
-            parameters: any(named: 'parameters'),
+            customParameters: any(), // Corrected named argument matching
+            analyticsAttributes: any(), // Corrected named argument matching
           )).called(1);
     });
   });

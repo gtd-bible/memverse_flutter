@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // Import for @visibleForTesting
 import 'package:logger/logger.dart';
 
 import 'analytics_manager.dart';
 
 /// Logging wrapper that outputs to both Logger (for development) and Crashlytics
 class AppLogger {
-  static final Logger _logger = Logger(
+  static Logger _logger = Logger(
     printer: PrettyPrinter(
       methodCount: 2,
       errorMethodCount: 8,
@@ -15,6 +15,14 @@ class AppLogger {
       dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
     ),
   );
+
+  @visibleForTesting
+  static set logger(Logger logger) {
+    _logger = logger;
+  }
+
+  @visibleForTesting
+  static Logger get logger => _logger;
 
   /// Log a trace level message (verbose)
   static void t(dynamic message, [dynamic error, StackTrace? stackTrace]) {

@@ -17,8 +17,8 @@ final bootstrapProvider = Provider<BootstrapValues>((ref) {
   // Validate that the CLIENT_ID is provided
   if (memVerseClientId.isEmpty) {
     throw Exception(
-      'CLIENT_ID environment variable is not defined. '
-      'Please run with --dart-define=CLIENT_ID=your_client_id',
+      'MMERVERSE_CLIENT_ID environment variable is not defined. '
+      'Please run with --dart-define=MEMVERSE_CLIENT_ID=your_client_id',
     );
   }
 
