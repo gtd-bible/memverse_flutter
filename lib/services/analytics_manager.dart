@@ -139,24 +139,44 @@ class AnalyticsManager {
     Map<String, Object?>? customParameters,
     Map<String, Object?>? analyticsAttributes,
   }) async {
-    final errorType = error.runtimeType.toString();
-    final errorMessage = error.toString();
-
+    // Get error details but clean up the message
+    final String errorType = error.runtimeType.toString();
+    String errorMessage = error.toString().trim();
+    
+    // Truncate very long error messages for analytics
+    final String fullErrorMessage = errorMessage;
+    if (errorMessage.length > 500) {
+      errorMessage = '${errorMessage.substring(0, 497)}...';
+    }
+    
     if (kDebugMode) {
       debugPrint('AnalyticsManager: Recording non-fatal error');
       debugPrint('  Error type: $errorType');
-      debugPrint('  Error message: $errorMessage');
+      debugPrint('  Error message: ${errorMessage.length > 100 ? "${errorMessage.substring(0, 97)}..." : errorMessage}');
     }
 
+    // Add more context to Crashlytics
+    await crashlytics.log('----------------FIREBASE CRASHLYTICS----------------');
+    await crashlytics.log(fullErrorMessage);
+    
+    // Format custom parameters for better readability in Crashlytics
+    final List<String> formattedParams = [];
+    if (customParameters != null) {
+      for (final entry in customParameters.entries) {
+        formattedParams.add('${entry.key}: ${entry.value}');
+      }
+    }
+    
     // Send to Crashlytics
     await crashlytics.recordError(
       error,
       stack,
       fatal: false,
-      information: customParameters?.entries.map<Object>((e) => '${e.key}: ${e.value}') ?? [],
+      information: formattedParams,
     );
+    await crashlytics.log('----------------------------------------------------');
 
-    // Send analytics event for the error
+    // Send analytics event for the error (with truncated message)
     final analyticsParams = <String, Object?>{
       'error_type': errorType,
       'error_message': errorMessage,

@@ -10,8 +10,6 @@ Add these exports to your `~/.zshrc` (Mac) or `~/.bashrc` (Linux):
 # Memverse App Configuration
 export MEMVERSE_CLIENT_ID="your_client_id_here"
 export MEMVERSE_CLIENT_API_KEY="your_api_key_here"
-export POSTHOG_MEMVERSE_API_KEY="your_posthog_key_here"
-export ENVIRONMENT="dev"
 ```
 
 **Then reload your shell:**
@@ -31,10 +29,8 @@ This script will automatically read your environment variables from `.zshrc`.
 #### Option B: Manual flutter run
 ```bash
 flutter run \
-  --dart-define=CLIENT_ID=$MEMVERSE_CLIENT_ID \
-  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY \
-  --dart-define=POSTHOG_MEMVERSE_API_KEY=$POSTHOG_MEMVERSE_API_KEY \
-  --dart-define=ENVIRONMENT=$ENVIRONMENT
+  --dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID \
+  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY
 ```
 
 ### 3. Building for Different Platforms
@@ -42,54 +38,39 @@ flutter run \
 #### Android (APK)
 ```bash
 flutter build apk \
-  --dart-define=CLIENT_ID=$MEMVERSE_CLIENT_ID \
-  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY \
-  --dart-define=POSTHOG_MEMVERSE_API_KEY=$POSTHOG_MEMVERSE_API_KEY \
-  --dart-define=ENVIRONMENT=$ENVIRONMENT
+  --dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID \
+  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY
 ```
 
 #### iOS (IPA)
 ```bash
 flutter build ios \
-  --dart-define=CLIENT_ID=$MEMVERSE_CLIENT_ID \
-  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY \
-  --dart-define=POSTHOG_MEMVERSE_API_KEY=$POSTHOG_MEMVERSE_API_KEY \
-  --dart-define=ENVIRONMENT=$ENVIRONMENT
+  --dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID \
+  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY
 ```
 
 #### Web
 ```bash
 flutter build web \
-  --dart-define=CLIENT_ID=$MEMVERSE_CLIENT_ID \
-  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY \
-  --dart-define=POSTHOG_MEMVERSE_API_KEY=$POSTHOG_MEMVERSE_API_KEY \
-  --dart-define=ENVIRONMENT=$ENVIRONMENT
+  --dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID \
+  --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY
 ```
 
-## Environment Configurations
 
-| Environment | ENVIRONMENT Value | API URL |
-|-------------|-------------------|---------|
-| Development | `dev` | https://api-dev.memverse.com |
-| Staging | `stg` | https://api-stg.memverse.com |
-| Production | `prd` | https://api.memverse.com |
 
 ## CI/CD Setup (GitHub Actions)
 
 Add these secrets in your GitHub repository settings:
 - `MEMVERSE_CLIENT_ID`
 - `MEMVERSE_CLIENT_API_KEY`
-- `POSTHOG_MEMVERSE_API_KEY`
 
 Example workflow usage:
 ```yaml
 - name: Build APK
   run: |
     flutter build apk \
-      --dart-define=CLIENT_ID=${{ secrets.MEMVERSE_CLIENT_ID }} \
-      --dart-define=MEMVERSE_CLIENT_API_KEY=${{ secrets.MEMVERSE_CLIENT_API_KEY }} \
-      --dart-define=POSTHOG_MEMVERSE_API_KEY=${{ secrets.POSTHOG_MEMVERSE_API_KEY }} \
-      --dart-define=ENVIRONMENT=${{ secrets.ENVIRONMENT }}
+      --dart-define=MEMVERSE_CLIENT_ID=${{ secrets.MEMVERSE_CLIENT_ID }} \
+      --dart-define=MEMVERSE_CLIENT_API_KEY=${{ secrets.MEMVERSE_CLIENT_API_KEY }}
 ```
 
 ## IDE Configuration
@@ -106,19 +87,14 @@ Create a new run configuration:
 2. Add new Flutter configuration
 3. Set "Additional arguments" to:
 ```
---dart-define=CLIENT_ID=$MEMVERSE_CLIENT_ID --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY --dart-define=POSTHOG_MEMVERSE_API_KEY=$POSTHOG_MEMVERSE_API_KEY --dart-define=ENVIRONMENT=dev
+--dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY
 ```
 
 ## Debug Mode Auto-Fallback
 
-In debug mode (`kDebugMode`), the app will automatically use `CLIENT_ID='debug'` if not provided. However, `MEMVERSE_CLIENT_API_KEY` is still required and will show a configuration error if missing.
+In debug mode (`kDebugMode`), the app will automatically use `MEMVERSE_CLIENT_ID='debug'` if not provided. However, `MEMVERSE_CLIENT_API_KEY` is still required and will show a configuration error if missing.
 
-## PostHog Analytics
 
-PostHog is optional. If `POSTHOG_MEMVERSE_API_KEY` is not provided:
-- Firebase Analytics/Crashlytics will continue to work
-- PostHog events will be logged but not sent
-- No errors will occur
 
 ## Firebase
 

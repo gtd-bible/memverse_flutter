@@ -87,22 +87,40 @@ class AppLogger {
     bool recordToCrashlytics = true,
     Map<String, Object?>? analyticsAttributes,
   ]) {
-    _logger.e(message, error: error, stackTrace: stackTrace);
-    AnalyticsManager.instance.crashlytics.log('[ERROR] $message');
+    // Format a clean log message
+    final String cleanMessage = message.toString().trim();
+    
+    // Log to console with pretty formatting
+    _logger.e(cleanMessage, error: error, stackTrace: stackTrace);
+    
+    // Add to Crashlytics logs (not a report yet, just for context)
+    AnalyticsManager.instance.crashlytics.log('[ERROR] $cleanMessage');
 
+    // Only send to Crashlytics if requested and we have an actual error
     if (recordToCrashlytics) {
+      // Use the provided error, or the message if no error was provided
       final errorToRecord = error ?? message;
+      
+      // Prepare custom parameters with a cleaner message
+      final customParameters = <String, String>{
+        'message': cleanMessage,
+        'timestamp': DateTime.now().toIso8601String(),
+        'log_level': 'ERROR',
+      };
+      
+      // Send to Crashlytics
       AnalyticsManager.instance.recordNonFatalError(
         errorToRecord,
         stackTrace,
-        customParameters: {'message': message.toString()},
+        customParameters: customParameters,
         analyticsAttributes: analyticsAttributes,
       );
     }
   }
 
-  static void e(dynamic message, [dynamic error, StackTrace? stackTrace]) =>
-      error(message, error, stackTrace, true);
+  /// Log an error level message (short form)
+  static void e(dynamic message, [dynamic err, StackTrace? stackTrace]) =>
+      error(message, err, stackTrace, true);
 
   /// Log a fatal error level message (short form)
   static void f(dynamic message, [dynamic error, StackTrace? stackTrace]) {
