@@ -46,8 +46,6 @@ class LoginPage extends HookConsumerWidget {
       return formKey.currentState!.validate() && isValid;
     }
 
-    // The debug auto-login functionality has been moved to DebugModeUtils class
-
     return Scaffold(
       appBar: AppBar(title: const Text('Memverse Login')),
       body: SingleChildScrollView(
@@ -115,29 +113,14 @@ class LoginPage extends HookConsumerWidget {
                       prefixIcon: kDebugMode
                           ? GestureDetector(
                               onLongPress: () {
-                                // Fill in username from environment variables
+                                // Hidden easter egg: Fill in username from environment variables
                                 final credentials = DebugModeUtils.getDebugCredentials();
                                 if (credentials.username.isNotEmpty) {
                                   usernameController.text = credentials.username;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Username filled from environment: ${credentials.username}',
-                                      ),
-                                      backgroundColor: Colors.blue,
-                                      duration: const Duration(seconds: 1),
-                                    ),
-                                  );
-                                } else {
-                                  context.showDebugSnackbar(
-                                    'MEMVERSE_USERNAME environment variable not set',
-                                  );
+                                  // No visual feedback for truly hidden feature
                                 }
                               },
-                              child: const Tooltip(
-                                message: 'Long press to auto-fill username from env variables',
-                                child: Icon(Icons.person),
-                              ),
+                              child: const Icon(Icons.person),
                             )
                           : const Icon(Icons.person),
                     ),
@@ -171,30 +154,19 @@ class LoginPage extends HookConsumerWidget {
                     },
                     externalVisibilityState: isPasswordVisible,
                     onVisibilityToggle: analyticsService.trackPasswordVisibilityToggle,
-                    // Add debug-only long press handler for the lock icon
+                    // Hidden easter egg long press handler for the lock icon
                     onLeadingIconLongPress: kDebugMode
                         ? () {
-                            // Fill in password from environment variables
+                            // Silently fill in password from environment variables
                             final credentials = DebugModeUtils.getDebugCredentials();
                             if (credentials.password.isNotEmpty) {
                               passwordController.text = credentials.password;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Password filled from environment: [REDACTED]'),
-                                  backgroundColor: Colors.blue,
-                                  duration: Duration(seconds: 1),
-                                ),
-                              );
-                            } else {
-                              context.showDebugSnackbar(
-                                'MEMVERSE_CORRECT_PASSWORD_DO_NOT_COMMIT environment variable not set',
-                              );
+                              // No visual feedback for truly hidden feature
                             }
                           }
                         : null,
                   ),
                 ),
-
                 const SizedBox(height: 32),
                 Semantics(
                   identifier: 'login_button',
@@ -217,53 +189,24 @@ class LoginPage extends HookConsumerWidget {
                               );
                             } catch (e) {
                               debugPrint('❌ Exception during auto-login: $e');
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Auto-login error: $e'),
-                                    backgroundColor: Colors.red,
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
-                              }
+                              // No user-facing error messages for truly hidden feature
                             }
                           }
                         : null,
-                    child: Tooltip(
-                      message: kDebugMode
-                          ? 'Tap to sign in, long press to auto-fill from env variables'
-                          : 'Tap to sign in',
-                      child: OutlinedButton(
-                        key: loginButtonKey,
-                        onPressed: authState.isLoading
-                            ? null
-                            : () async {
-                                if (await validateFormWithAnalytics()) {
-                                  await ref
-                                      .read(authStateProvider.notifier)
-                                      .login(usernameController.text, passwordController.text);
-                                }
-                              },
-                        child: authState.isLoading
-                            ? const CircularProgressIndicator()
-                            : kDebugMode
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text('Sign In', style: TextStyle(fontSize: 16)),
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 8.0),
-                                    child: Tooltip(
-                                      message:
-                                          'Long press to auto-login with environment credentials',
-                                      child: Icon(Icons.touch_app, size: 14, color: Colors.grey),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const Text('Sign In', style: TextStyle(fontSize: 16)),
-                      ),
+                    child: OutlinedButton(
+                      key: loginButtonKey,
+                      onPressed: authState.isLoading
+                          ? null
+                          : () async {
+                              if (await validateFormWithAnalytics()) {
+                                await ref
+                                    .read(authStateProvider.notifier)
+                                    .login(usernameController.text, passwordController.text);
+                              }
+                            },
+                      child: authState.isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Sign In', style: TextStyle(fontSize: 16)),
                     ),
                   ),
                 ),

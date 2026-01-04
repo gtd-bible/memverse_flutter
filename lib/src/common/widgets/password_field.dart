@@ -48,10 +48,7 @@ class PasswordField extends HookWidget {
         prefixIcon: kDebugMode && onLeadingIconLongPress != null
             ? GestureDetector(
                 onLongPress: onLeadingIconLongPress,
-                child: Tooltip(
-                  message: 'Long press to auto-fill password from env variables',
-                  child: const Icon(Icons.lock),
-                ),
+                child: const Icon(Icons.lock),
               )
             : const Icon(Icons.lock),
         hintText: hintText,
