@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <!-- White background circle -->
-  <circle cx="512" cy="512" r="512" fill="#fff"/>
-  <!-- Green 'V' -->
-  <text x="512" y="800" font-family="Arial, Helvetica, sans-serif" font-size="650" font-weight="bold" fill="#3CAF50" text-anchor="middle" dominant-baseline="middle" style="letter-spacing: -40px;">V</text>
-  <!-- Green 'M' above, horizontally centered -->
-  <text x="512" y="500" font-family="Arial, Helvetica, sans-serif" font-size="520" font-weight="bold" fill="#3CAF50" text-anchor="middle" dominant-baseline="middle" style="letter-spacing: -50px;">M</text>
-</svg>
