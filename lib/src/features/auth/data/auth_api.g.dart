@@ -26,21 +26,20 @@ class _AuthApi implements AuthApi {
     String clientSecret,
   ) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = {
+    final queryParameters = <String, dynamic>{
       'grant_type': grantType,
       'username': username,
       'password': password,
       'client_id': clientId,
       'client_secret': clientSecret,
     };
+    final _headers = <String, dynamic>{};
+    final _data = null;
     final _options = _setStreamType<AuthToken>(
       Options(
             method: 'POST',
             headers: _headers,
             extra: _extra,
-            contentType: 'application/x-www-form-urlencoded',
           )
           .compose(_dio.options, '/oauth/token', queryParameters: queryParameters, data: _data)
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
