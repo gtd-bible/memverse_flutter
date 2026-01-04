@@ -2,7 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/services/analytics_manager.dart';
-import 'package:mini_memverse/src/app/view/app.dart';
+import 'package:mini_memverse/src/common/providers/talker_provider.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mini_memverse/src/features/settings/presentation/analytics_provider.dart';
 import 'package:mini_memverse/src/features/settings/presentation/theme_provider.dart';
@@ -67,9 +67,11 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: const Text('View application logs'),
             leading: const Icon(Icons.list_alt),
             onTap: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (context) => TalkerScreen(talker: talker)));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => TalkerScreen(talker: ref.read(talkerProvider)),
+                ),
+              );
             },
           ),
           Builder(
@@ -79,15 +81,16 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: const Text('Share logs for debugging'),
                 leading: const Icon(Icons.share),
                 onTap: () async {
-                  final logs = talker.history.map((log) => log.generateTextMessage()).join('\n');
+                  final logs = ref
+                      .read(talkerProvider)
+                      .history
+                      .map((log) => log.generateTextMessage())
+                      .join('\n');
                   final box = builderContext.findRenderObject() as RenderBox?;
                   final sharePositionOrigin = box != null
                       ? box.localToGlobal(Offset.zero) & box.size
                       : null;
-                  await Share.share(
-                    logs,
-                    sharePositionOrigin: sharePositionOrigin,
-                  );
+                  await Share.share(logs, sharePositionOrigin: sharePositionOrigin);
                 },
               );
             },
