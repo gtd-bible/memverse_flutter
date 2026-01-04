@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -14,6 +15,7 @@ class PasswordField extends HookWidget {
     this.focusNode,
     this.onVisibilityToggle,
     this.externalVisibilityState,
+    this.onLeadingIconLongPress,
   });
 
   final TextEditingController controller;
@@ -26,6 +28,7 @@ class PasswordField extends HookWidget {
   final FocusNode? focusNode;
   final void Function(bool)? onVisibilityToggle;
   final ValueNotifier<bool>? externalVisibilityState;
+  final VoidCallback? onLeadingIconLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,15 @@ class PasswordField extends HookWidget {
       decoration: InputDecoration(
         labelText: labelText,
         border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.lock),
+        prefixIcon: kDebugMode && onLeadingIconLongPress != null
+            ? GestureDetector(
+                onLongPress: onLeadingIconLongPress,
+                child: Tooltip(
+                  message: 'Long press to auto-fill password from env variables',
+                  child: const Icon(Icons.lock),
+                ),
+              )
+            : const Icon(Icons.lock),
         hintText: hintText,
         suffixIcon: IconButton(
           icon: Icon(visibilityState.value ? Icons.visibility : Icons.visibility_off),
