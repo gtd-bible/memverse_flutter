@@ -25,8 +25,8 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   }
 
   // Get client credentials from environment variables
-  const clientId = String.fromEnvironment('CLIENT_ID');
-  const clientSecret = String.fromEnvironment('CLIENT_API_KEY');
+  const clientId = String.fromEnvironment('MEMVERSE_CLIENT_ID');
+  const clientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
 
   return ApiUserRepository(dio: dio, clientId: clientId, clientSecret: clientSecret);
 });

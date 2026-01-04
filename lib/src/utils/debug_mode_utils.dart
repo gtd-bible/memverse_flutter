@@ -17,6 +17,8 @@ class DebugModeUtils {
 
   /// Get debug credentials from environment variables
   static ({String username, String password}) getDebugCredentials() {
+    // Use the environment variable names exactly as provided
+    // in your .zshrc file (MEMVERSE_USERNAME and MEMVERSE_CORRECT_PASSWORD_DO_NOT_COMMIT)
     const username = String.fromEnvironment('MEMVERSE_USERNAME');
     const password = String.fromEnvironment('MEMVERSE_CORRECT_PASSWORD_DO_NOT_COMMIT');
 

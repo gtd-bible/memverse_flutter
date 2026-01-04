@@ -31,6 +31,11 @@ final clientIdProvider = Provider<String>((ref) {
   return ref.watch(bootstrapProvider).clientId;
 });
 
+/// Provider for the client secret
+final clientSecretProvider = Provider<String>((ref) {
+  return ref.watch(bootstrapProvider).clientSecret;
+});
+
 /// Provider for the AuthService
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
@@ -40,8 +45,9 @@ final authServiceProvider = Provider<AuthService>((ref) {
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authService = ref.watch(authServiceProvider);
   final clientId = ref.watch(clientIdProvider);
+  final clientSecret = ref.watch(clientSecretProvider);
   final analyticsService = ref.watch(analyticsServiceProvider);
-  return AuthNotifier(authService, clientId, analyticsService);
+  return AuthNotifier(authService, clientId, clientSecret, analyticsService);
 });
 
 /// Authentication state
@@ -66,13 +72,14 @@ class AuthState {
 
 /// Authentication state notifier
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(this._authService, this._clientId, this._analyticsService)
+  AuthNotifier(this._authService, this._clientId, this._clientSecret, this._analyticsService)
     : super(const AuthState()) {
     _init();
   }
 
   final AuthService _authService;
   final String _clientId;
+  final String _clientSecret;
   final AnalyticsService _analyticsService;
 
   Future<void> _init() async {
@@ -90,8 +97,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = state.copyWith(isLoading: true);
 
-      AppLogger.i('***Attempting login with client ID present: ${_clientId.isNotEmpty}');
-      final token = await _authService.login(username, password, _clientId);
+      AppLogger.i(
+        '***Attempting login with client ID: ${_clientId.isNotEmpty ? "PRESENT" : "MISSING"}',
+      );
+      AppLogger.i(
+        '***Attempting login with client secret: ${_clientSecret.isNotEmpty ? "PRESENT" : "MISSING"}',
+      );
+      final token = await _authService.login(username, password, _clientId, _clientSecret);
 
       // Log token information (non-sensitive parts)
       if (token.accessToken.isNotEmpty) {
@@ -110,7 +122,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Track login failure
       await _analyticsService.trackLoginFailure(username, e.toString());
 
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // Extract friendly error message if available
+      String userFriendlyError;
+
+      if (e.toString().contains('Exception: ')) {
+        // Extract the message from our improved error handling in auth_service.dart
+        userFriendlyError = e.toString().replaceFirst('Exception: ', '');
+      } else {
+        // Fallback for unexpected errors
+        userFriendlyError = 'Login failed. Please check your credentials and try again.';
+      }
+
+      state = state.copyWith(isLoading: false, error: userFriendlyError);
     }
   }
 

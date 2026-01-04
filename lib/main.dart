@@ -111,7 +111,8 @@ Future<void> main() async {
       const ConfigurationErrorWidget(
         error:
             'Missing required MEMVERSE_CLIENT_ID configuration for authentication.\n\n'
-            'This value is needed for OAuth authentication.',
+            'This value is needed for OAuth authentication.\n\n'
+            'Please run with: --dart-define=MEMVERSE_CLIENT_ID=your_client_id',
       ),
     );
     return;

@@ -3,24 +3,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Class to hold bootstrap values
 class BootstrapValues {
   /// Constructor
-  const BootstrapValues({required this.clientId});
+  const BootstrapValues({required this.clientId, required this.clientSecret});
 
   /// The client ID used for authentication
   final String clientId;
+
+  /// The client secret/API key used for authentication
+  final String clientSecret;
 }
 
 /// Provider for bootstrap values
 final bootstrapProvider = Provider<BootstrapValues>((ref) {
-  // Get the CLIENT_ID from dart-define
-  const memVerseClientId = String.fromEnvironment('MEMVERSE_CLIENT_ID');
+  // Get the client ID and secret from dart-define
+  // Use MEMVERSE_ prefixes to match documentation and .zshrc variables
+  const clientId = String.fromEnvironment('MEMVERSE_CLIENT_ID');
 
-  // Validate that the CLIENT_ID is provided
-  if (memVerseClientId.isEmpty) {
+  const memVerseClientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
+
+  // Validate that the MEMVERSE_CLIENT_ID is provided
+  if (clientId.isEmpty) {
     throw Exception(
-      'MMERVERSE_CLIENT_ID environment variable is not defined. '
+      'MEMVERSE_CLIENT_ID environment variable is not defined. '
       'Please run with --dart-define=MEMVERSE_CLIENT_ID=your_client_id',
     );
   }
 
-  return const BootstrapValues(clientId: memVerseClientId);
+  // Validate that the CLIENT_API_KEY is provided
+  if (memVerseClientSecret.isEmpty) {
+    throw Exception(
+      'MEMVERSE_CLIENT_API_KEY environment variable is not defined. '
+      'Please run with --dart-define=MEMVERSE_CLIENT_API_KEY=your_client_api_key',
+    );
+  }
+
+  return BootstrapValues(clientId: clientId, clientSecret: memVerseClientSecret);
 });

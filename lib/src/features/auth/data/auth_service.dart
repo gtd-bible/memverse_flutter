@@ -9,7 +9,7 @@ import 'package:mini_memverse/src/constants/api_constants.dart';
 import 'package:mini_memverse/src/features/auth/data/auth_api.dart';
 import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
 
-const String clientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
+// Client secret is now provided directly via the login method
 
 /// Authentication service for handling login, token storage, and session management
 ///
@@ -36,6 +36,40 @@ class AuthService {
 
   static Dio _createDioWithLogging(Dio? dio) {
     final dioInstance = dio ?? Dio();
+
+    // Configure default settings to match successful curl request
+    dioInstance.options.validateStatus = (status) => status! < 500;
+
+    // CRITICAL: For OAuth token endpoint, we need to make the request exactly match the curl command
+    dioInstance.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          // FIX: For OAuth endpoint, ensure we match the successful curl command exactly
+          if (options.path.contains('/oauth/token')) {
+            AppLogger.i('🔄 Applying special handling for OAuth token endpoint');
+
+            // 1. CLEAR ALL QUERY PARAMETERS - they should only be in the form body
+            if (options.queryParameters.isNotEmpty) {
+              AppLogger.w(
+                '⚠️ Clearing query parameters from OAuth request: ${options.queryParameters}',
+              );
+              options.queryParameters = {};
+            }
+
+            // 2. ENSURE CORRECT CONTENT TYPE
+            options.contentType = 'application/x-www-form-urlencoded';
+            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+
+            // 3. VERIFY WE HAVE FORM DATA
+            if (options.data == null || options.data is! Map) {
+              AppLogger.e('❌ OAuth request data is not correctly formatted! ${options.data}');
+            }
+          }
+
+          handler.next(options);
+        },
+      ),
+    );
 
     // Add curl logging to see exactly what's sent
     dioInstance.interceptors.add(CurlLoggingInterceptor());
@@ -80,7 +114,12 @@ class AuthService {
   static bool isDummyUser = false;
 
   /// Attempts to login with the provided credentials
-  Future<AuthToken> login(String username, String password, String clientId) async {
+  Future<AuthToken> login(
+    String username,
+    String password,
+    String clientId,
+    String clientSecret,
+  ) async {
     // Dummy user fast-path (bypasses all real auth)
     if (username.toLowerCase() == 'dummysigninuser@dummy.com') {
       isDummyUser = true;
@@ -114,7 +153,68 @@ class AuthService {
       return authToken;
     } catch (e) {
       AppLogger.error('Login failed with AuthApi/Retrofit exception', e);
-      throw Exception('Login failed via Retrofit: $e');
+
+      // Extract useful information from different error types
+      String friendlyMessage;
+      String technicalDetails;
+
+      if (e is DioException) {
+        // This is a network/HTTP error
+        if (e.type == DioExceptionType.connectionTimeout) {
+          friendlyMessage = 'Connection timeout - Please check your internet connection';
+          technicalDetails = 'Network timeout: ${e.message}';
+        } else if (e.type == DioExceptionType.connectionError) {
+          friendlyMessage = 'Connection error - Unable to reach the Memverse server';
+          technicalDetails = 'Connection error: ${e.message}';
+        } else if (e.response != null) {
+          // We have a server response with error
+          final statusCode = e.response!.statusCode;
+          final responseData = e.response!.data;
+
+          // Handle specific status codes
+          switch (statusCode) {
+            case 401:
+              friendlyMessage = 'Invalid username or password';
+              technicalDetails = 'Authentication failed (401): $responseData';
+              break;
+            case 403:
+              friendlyMessage = 'Access denied - Check your client ID and API key';
+              technicalDetails = 'Authorization failed (403): $responseData';
+              break;
+            case 404:
+              friendlyMessage = 'API endpoint not found - Contact support';
+              technicalDetails = 'Endpoint not found (404): ${e.requestOptions.path}';
+              break;
+            case 302:
+              friendlyMessage =
+                  'Server redirected the request - Authentication endpoint configuration issue';
+              technicalDetails = 'Redirect (302) to: ${e.response?.headers['location']}';
+              break;
+            default:
+              friendlyMessage = 'Server error (Status ${statusCode}) - Please try again later';
+              technicalDetails = 'HTTP ${statusCode}: $responseData';
+          }
+        } else {
+          // Other Dio error without response
+          friendlyMessage = 'Network error - Please check your connection';
+          technicalDetails = 'Dio error (${e.type}): ${e.message}';
+        }
+      } else if (e.toString().contains('Null check operator used on a null value')) {
+        // Handle null check errors which likely mean invalid response format
+        friendlyMessage = 'Server returned an unexpected response format';
+        technicalDetails = 'Null check error processing server response: $e';
+      } else {
+        // Generic error fallback
+        friendlyMessage = 'Login failed - Please try again';
+        technicalDetails = 'Unhandled exception: $e';
+      }
+
+      // Log both messages but only throw the user-friendly one
+      AppLogger.error('FRIENDLY ERROR: $friendlyMessage');
+      AppLogger.error('TECHNICAL DETAILS: $technicalDetails');
+
+      // Rethrow with a user-friendly message
+      throw Exception(friendlyMessage);
     }
   }
 
@@ -172,7 +272,12 @@ class MockAuthService extends AuthService {
   Future<bool> isLoggedIn() async => true;
 
   @override
-  Future<AuthToken> login(String username, String password, String clientId) async => AuthToken(
+  Future<AuthToken> login(
+    String username,
+    String password,
+    String clientId,
+    String clientSecret,
+  ) async => AuthToken(
     accessToken: 'mock',
     tokenType: 'Bearer',
     scope: 'user',
