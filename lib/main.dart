@@ -88,13 +88,8 @@ class ConfigurationErrorWidget extends StatelessWidget {
 }
 
 Future<void> main() async {
-  // Make zone errors fatal in debug mode to catch zone mismatches early
-  if (kDebugMode) {
-    BindingBase.debugZoneErrorsAreFatal = true;
-  }
-
   // Initialize Flutter binding
-  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
   // Check for required environment variables
   var memverseClientId = const String.fromEnvironment('MEMVERSE_CLIENT_ID');
@@ -163,41 +158,8 @@ Future<void> main() async {
     AppLogger.i('🌍 Using API URL: https://www.memverse.com');
     AppLogger.i('🚀 Firebase Analytics initialized');
 
-    // INTENTIONAL TEST: Create a zone mismatch to test error handling
-    runZonedGuarded(
-      () async {
-        AppLogger.i('⚠️ INTENTIONAL TEST: Running app in a different zone to test error handling');
-
-        // This will cause a zone mismatch since the Flutter binding was initialized in a different zone
-        await bootstrap(() => const App());
-      },
-      (error, stackTrace) {
-        // Create a cleaner, more professional error message
-        final String cleanErrorMsg =
-            'Flutter Zone Mismatch: App initialization and rendering occurred in different zones';
-        debugPrint('⚠️ ZONE MISMATCH DETECTED (INTENTIONAL TEST)');
-        debugPrint('Error details: $cleanErrorMsg');
-
-        // Create a custom error with a cleaner message
-        final customError = FlutterError(cleanErrorMsg);
-
-        // Only log once with our AppLogger - avoid duplicate reports
-        AppLogger.error(
-          'Zone mismatch detected',
-          customError,
-          stackTrace,
-          true, // recordToCrashlytics = true
-          {
-            // Custom analytics attributes
-            'error_type': 'zone_mismatch',
-            'error_source': 'intentional_test',
-            'app_state': 'initialization',
-            'test_scenario': 'zone_mismatch_test',
-            'is_intentional': 'true',
-          },
-        );
-      },
-    );
+    // Initialize the app
+    await bootstrap(() => const App());
   } catch (error, stackTrace) {
     AppLogger.e('Fatal error during initialization', error, stackTrace);
     if (kDebugMode) {
