@@ -128,19 +128,19 @@ flutter:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/icons/text_based_icon.png"
+  image_path: "assets/icons/vector_mv_icon.png"
   min_sdk_android: 21
   remove_alpha_ios: true  # Remove alpha for App Store compliance
-  adaptive_icon_background: "#4CAF50"  # Using green background for adaptive icons to match
-  adaptive_icon_foreground: "assets/icons/text_based_icon.png"
+  adaptive_icon_background: "#4CAF50"
+  adaptive_icon_foreground: "assets/icons/vector_mv_icon.png"
   web:
     generate: true
-    image_path: "assets/icons/text_based_icon.png"
-    background_color: "#4CAF50"
-    theme_color: "#4CAF50"
+    image_path: "assets/icons/green_m_on_v.png"
+    background_color: "#fff"
+    theme_color: "#3CAF50"
   windows:
     generate: true
-    image_path: "assets/icons/text_based_icon.png"
+    image_path: "assets/icons/green_m_on_v.png"
   macos:
     generate: true
-    image_path: "assets/icons/text_based_icon.png"
+    image_path: "assets/icons/green_m_on_v.png"
