@@ -20,18 +20,17 @@ abstract class AuthApi {
 
   /// Request OAuth access token using password grant flow
   ///
-  /// This endpoint expects query parameters according to the Memverse API spec:
-  /// - grant_type: "password" (OAuth2 password flow)
-  /// - username: User's email address
-  /// - password: User's password
-  /// - client_id: OAuth client identifier
-  /// - client_secret: OAuth client secret (required by Memverse API)
+  /// This endpoint follows OAuth 2.0 password grant standard:
+  /// - Needs to be at root level (/oauth/token, not under /api/v1)
+  /// - Requires application/x-www-form-urlencoded content type
+  /// - Parameters must be in form body (not query parameters)
   @POST('/oauth/token')
+  @FormUrlEncoded()
   Future<AuthToken> getBearerToken(
-    @Query('grant_type') String grantType,
-    @Query('username') String username,
-    @Query('password') String password,
-    @Query('client_id') String clientId,
-    @Query('client_secret') String clientSecret,
+    @Field('grant_type') String grantType,
+    @Field('username') String username,
+    @Field('password') String password,
+    @Field('client_id') String clientId,
+    @Field('client_secret') String clientSecret,
   );
 }
