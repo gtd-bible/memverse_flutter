@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Solid green background circle - matched to screenshot color -->
+  <circle cx="512" cy="512" r="512" fill="#4CAF50" />
+  
+  <!-- MV text as it appears in screenshot - using a sans-serif font with correct proportions -->
+  <g>
+    <!-- M letter exactly as it appears in screenshot -->
+    <path d="M280,335 L280,689 L345,689 L345,455 L430,605 L512,605 L597,455 L597,689 L662,689 L662,335 L585,335 L512,485 L439,335 Z" 
+          fill="white" />
+    
+    <!-- V letter exactly as it appears in screenshot -->
+    <path d="M685,335 L620,689 L685,689 L744,490 L803,689 L868,689 L803,335 Z" 
+          fill="white" />
+  </g>
+</svg>
