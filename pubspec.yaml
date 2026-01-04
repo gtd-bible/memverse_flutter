@@ -81,6 +81,7 @@ dev_dependencies:
   riverpod_generator: ^2.6.5
   build_runner: ^2.5.4
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.10
   flutter_svg: ^2.0.10+1  # For SVG support
 
 # For information on the generic Dart part of this file, see the
@@ -144,3 +145,10 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/icons/green_m_on_v.png"
+
+flutter_native_splash:
+  color: "#4CAF50"
+  image: assets/icons/vector_mv_icon.png
+  android: true
+  ios: true
+  web: true
