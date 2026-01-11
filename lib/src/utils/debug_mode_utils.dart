@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 
+import '../constants/app_constants.dart';
+
 /// Utility class for debug-only features.
 ///
 /// This class contains utility methods that are only available in debug mode
