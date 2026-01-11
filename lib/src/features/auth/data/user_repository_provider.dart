@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mini_memverse/src/constants/app_constants.dart';
 import 'package:mini_memverse/src/features/auth/data/api_user_repository.dart';
 import 'package:mini_memverse/src/features/auth/data/fake_user_repository.dart';
 import 'package:mini_memverse/src/features/auth/domain/user_repository.dart';
@@ -25,8 +26,8 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   }
 
   // Get client credentials from app constants
-  const clientId = memverseClientId;
-  const clientSecret = memverseClientSecret;
+  final clientId = memverseClientId;
+  final clientSecret = memverseClientSecret;
 
   return ApiUserRepository(dio: dio, clientId: clientId, clientSecret: clientSecret);
 });
