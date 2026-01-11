@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mini_memverse/src/common/services/analytics_service.dart';
+import 'package:mini_memverse/src/common/widgets/build_info.dart';
 import 'package:mini_memverse/src/common/widgets/password_field.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mini_memverse/src/features/auth/presentation/signup_page.dart';
@@ -14,20 +14,19 @@ const loginPasswordFieldKey = ValueKey('login_password_field');
 const loginButtonKey = ValueKey('login_button');
 const passwordVisibilityToggleKey = ValueKey('password_visibility_toggle');
 
-class LoginPage extends HookConsumerWidget {
+class LoginPage extends ConsumerWidget {
   const LoginPage({super.key = const ValueKey('login_page')});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = useMemoized(GlobalKey<FormState>.new);
-    final usernameController = useTextEditingController();
-    final passwordController = useTextEditingController();
-    final passwordFocusNode = useFocusNode();
+    final formKey = GlobalKey<FormState>();
+    final usernameController = TextEditingController();
+    final passwordController = TextEditingController();
+    final passwordFocusNode = FocusNode();
     final authState = ref.watch(authStateProvider);
-    final isPasswordVisible = useState(false);
+    final isPasswordVisible = ValueNotifier(false);
     final analyticsService = ref.read(analyticsServiceProvider);
 
-    // Function to validate form and track validation failures
     Future<bool> validateFormWithAnalytics() async {
       var isValid = true;
 
@@ -87,6 +86,7 @@ class LoginPage extends HookConsumerWidget {
                     );
                   },
                 ),
+                Consumer(builder: (context, ref, _) => BuildInfoText()),
                 const SizedBox(height: 32),
                 const Text(
                   'Welcome to Memverse',
