@@ -4,8 +4,9 @@ description: "Memverse flutter -mobile front end for memverse.com"
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.852.0+85200 # 0.52.0+5200 - 1-Jan-2026 iOS app Dist test
-# 0.852.0+85200 could be greater than Dec 2 legacy app if desired
+version: 0.9.0+85300 # Follows semver: major.minor.patch+buildNumber
+# 0.9.0: Pre-release version with analytics and crashlytics integration
+# 85300: Build number incremented from 85200
 environment:
   sdk: 3.10.4
   flutter: 3.38.5
@@ -41,7 +42,9 @@ dependencies:
   hooks_riverpod: ^2.6.1
   intl: ^0.20.2
   json_annotation: ^4.9.0
+  package_info_plus: ^9.0.0
   path_provider: 2.1.5
+  provider: ^6.1.1
   riverpod_annotation: 2.6.1
   retrofit: ^4.6.0
   share_plus: 11.0.0
@@ -58,6 +61,7 @@ dev_dependencies:
     sdk: flutter
 
   mockingjay: ^2.1.0
+  mocktail: ^1.0.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -65,7 +69,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  mocktail: ^1.0.4
   integration_test:
     sdk: flutter
 

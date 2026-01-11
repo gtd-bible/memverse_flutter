@@ -1,282 +1,162 @@
-import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart'; // Import for @visibleForTesting
+import 'package:flutter/foundation.dart';
 
-/// Wrapper/manager for Analytics and Crashlytics
-/// Handles both analytics events and crash reporting with automatic correlation
+/// Centralized analytics management for Firebase Analytics and Crashlytics
 class AnalyticsManager {
-  static AnalyticsManager? _instance;
-  // Make the setter for _instance visible for testing purposes
-  @visibleForTesting
-  static set instance(AnalyticsManager? value) => _instance = value;
-  static AnalyticsManager get instance => _instance ??= AnalyticsManager._();
+  /// Private constructor for singleton
+  AnalyticsManager._();
 
-  AnalyticsManager._() {
-    _initializeUserProperties();
-  }
+  /// The singleton instance
+  static AnalyticsManager instance = AnalyticsManager._();
 
-  FirebaseAnalytics get analytics => FirebaseAnalytics.instance;
-  FirebaseCrashlytics get crashlytics => FirebaseCrashlytics.instance;
+  /// The Firebase Analytics instance
+  final _analytics = FirebaseAnalytics.instance;
 
-  final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
+  /// The Firebase Crashlytics instance
+  final _crashlytics = FirebaseCrashlytics.instance;
 
-  /// Flag to indicate if the app is running in integration test mode
-  bool isIntegrationTest = false;
+  /// Getter for analytics
+  FirebaseAnalytics get analytics => _analytics;
 
-  /// Set the integration test flag
-  /// This will add `is_integration_test: true` to all analytics events
-  void setIntegrationTestMode(bool value) {
-    isIntegrationTest = value;
-  }
+  /// Getter for crashlytics
+  FirebaseCrashlytics get crashlytics => _crashlytics;
 
-  /// Initialize and set user properties for analytics
-  Future<void> _initializeUserProperties() async {
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Initializing user properties');
+  /// Access to tester type environment variable
+  static String get testerType => const String.fromEnvironment('TESTER_TYPE', defaultValue: '');
+
+  /// Initializes the AnalyticsManager
+  Future<void> initialize() async {
+    // Set analytics collection enabled based on build mode
+    await _analytics.setAnalyticsCollectionEnabled(!kDebugMode);
+
+    // Set Crashlytics collection enabled based on build mode
+    await _crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
+
+    // Set environment variables as user properties for analytics
+    final testerTypeValue = testerType;
+    if (testerTypeValue.isNotEmpty) {
+      await _analytics.setUserProperty(name: 'tester_type', value: testerTypeValue);
+      _crashlytics.setCustomKey('tester_type', testerTypeValue);
     }
 
-    try {
-      if (kIsWeb) {
-        await _setWebUserProperties();
-      } else if (Platform.isAndroid) {
-        await _setAndroidUserProperties();
-      } else if (Platform.isIOS) {
-        await _setIOSUserProperties();
+    // Log app_configuration event with environment variables
+    await _analytics.logEvent(
+      name: 'app_configuration',
+      parameters: {
+        'tester_type': testerTypeValue.isEmpty ? 'none' : testerTypeValue,
+        'debug_mode': kDebugMode.toString(),
+      },
+    );
+
+    // Log initialization success
+    if (kDebugMode) {
+      print('📊 Analytics initialized. Collection enabled: ${!kDebugMode}');
+      print('🔥 Crashlytics initialized. Collection enabled: ${!kDebugMode}');
+
+      if (testerTypeValue.isNotEmpty) {
+        print('👤 Tester type: $testerTypeValue');
       }
-    } catch (e) {
+    }
+  }
+
+  /// Sets user identifier for both Analytics and Crashlytics
+  Future<void> setUserId(String? userId) async {
+    if (userId != null && userId.isNotEmpty) {
+      // Set user ID for Analytics
+      await _analytics.setUserId(id: userId);
+
+      // Set user ID for Crashlytics
+      await _crashlytics.setUserIdentifier(userId);
+
       if (kDebugMode) {
-        debugPrint('AnalyticsManager: Error setting user properties: $e');
+        print('🔑 User ID set: $userId');
+      }
+    } else {
+      // Clear user ID if null or empty
+      await _analytics.setUserId(id: null);
+      await _crashlytics.setUserIdentifier('');
+
+      if (kDebugMode) {
+        print('🔑 User ID cleared');
       }
     }
   }
 
-  /// Set user properties for web platform
-  Future<void> _setWebUserProperties() async {
-    final webInfo = await _deviceInfoPlugin.webBrowserInfo;
-    await analytics.setUserProperty(name: 'os_platform', value: 'web');
-    await analytics.setUserProperty(name: 'os_version', value: webInfo.browserName.name);
-    await analytics.setUserProperty(name: 'manufacturer', value: 'web');
-  }
-
-  /// Set user properties for Android platform
-  Future<void> _setAndroidUserProperties() async {
-    final androidInfo = await _deviceInfoPlugin.androidInfo;
-    await analytics.setUserProperty(name: 'os_platform', value: 'android');
-    await analytics.setUserProperty(name: 'os_version', value: androidInfo.version.release);
-    await analytics.setUserProperty(name: 'manufacturer', value: androidInfo.manufacturer);
-  }
-
-  /// Set user properties for iOS platform
-  Future<void> _setIOSUserProperties() async {
-    final iosInfo = await _deviceInfoPlugin.iosInfo;
-    await analytics.setUserProperty(name: 'os_platform', value: 'ios');
-    await analytics.setUserProperty(name: 'os_version', value: iosInfo.systemVersion);
-    await analytics.setUserProperty(name: 'manufacturer', value: 'apple');
-  }
-
-  /// Manually update user properties (call this after initialization if needed)
-  Future<void> updateUserProperties() async {
-    await _initializeUserProperties();
-  }
-
-  /// Get default analytics properties that should be included with every event
-  Map<String, Object> _getDefaultProperties() {
-    final now = DateTime.now();
-    final monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    final monthYear = '${now.year}${monthNames[now.month - 1]}';
-
-    final properties = <String, Object>{
-      'flutter': 'true',
-      'debug_mode': kDebugMode.toString(),
-      'month_year': monthYear,
-    };
-
-    if (isIntegrationTest) {
-      properties['is_integration_test'] = 'true';
-    }
-
-    return properties;
-  }
-
-  /// Log an analytics event with the given name and parameters
-  Future<void> logEvent(String eventName, Map<String, Object?>? parameters) async {
-    final defaultParams = _getDefaultProperties();
-    final mergedParams = <String, Object>{...defaultParams};
-    if (parameters != null) {
-      mergedParams.addAll(parameters.cast<String, Object>());
-    }
-
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Sending analytics event: $eventName');
-      debugPrint('  Parameters: $mergedParams');
-    }
-    await analytics.logEvent(name: eventName, parameters: mergedParams);
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Analytics event sent: $eventName');
-    }
-  }
-
-  /// Record a non-fatal error to Crashlytics and send a corresponding analytics event
-  Future<void> recordNonFatalError(
+  /// Records a non-fatal error to Crashlytics
+  void recordNonFatalError(
     dynamic error,
-    StackTrace? stack, {
-    Map<String, Object?>? customParameters,
+    StackTrace? stackTrace, {
+    Map<String, String>? customParameters,
     Map<String, Object?>? analyticsAttributes,
-  }) async {
-    // Get error details but clean up the message
-    final String errorType = error.runtimeType.toString();
-    String errorMessage = error.toString().trim();
-    
-    // Truncate very long error messages for analytics
-    final String fullErrorMessage = errorMessage;
-    if (errorMessage.length > 500) {
-      errorMessage = '${errorMessage.substring(0, 497)}...';
-    }
-    
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Recording non-fatal error');
-      debugPrint('  Error type: $errorType');
-      debugPrint('  Error message: ${errorMessage.length > 100 ? "${errorMessage.substring(0, 97)}..." : errorMessage}');
-    }
-
-    // Add more context to Crashlytics
-    await crashlytics.log('----------------FIREBASE CRASHLYTICS----------------');
-    await crashlytics.log(fullErrorMessage);
-    
-    // Format custom parameters for better readability in Crashlytics
-    final List<String> formattedParams = [];
+  }) {
+    // Set any custom keys for better error analysis
     if (customParameters != null) {
       for (final entry in customParameters.entries) {
-        formattedParams.add('${entry.key}: ${entry.value}');
+        _crashlytics.setCustomKey(entry.key, entry.value);
       }
     }
-    
-    // Send to Crashlytics
-    await crashlytics.recordError(
+
+    // Record the error
+    _crashlytics.recordError(
       error,
-      stack,
+      stackTrace,
+      reason: customParameters?['message'] ?? 'Non-fatal error',
       fatal: false,
-      information: formattedParams,
     );
-    await crashlytics.log('----------------------------------------------------');
 
-    // Send analytics event for the error (with truncated message)
-    final analyticsParams = <String, Object?>{
-      'error_type': errorType,
-      'error_message': errorMessage,
-      'is_fatal': 'false',
-    };
+    // Also log to analytics if attributes provided
     if (analyticsAttributes != null) {
-      analyticsParams.addAll(analyticsAttributes);
-    }
-
-    await logEvent('non_fatal_error', analyticsParams.cast<String, Object?>());
-
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Non-fatal error recorded');
+      final Map<String, Object> firebaseParams = analyticsAttributes.map(
+        (key, value) => MapEntry(key, value as Object),
+      );
+      _analytics.logEvent(name: 'app_error', parameters: firebaseParams);
     }
   }
 
-  /// Record a fatal error to Crashlytics and send a corresponding analytics event
-  Future<void> recordFatalError(
+  /// Records a fatal error to Crashlytics
+  void recordFatalError(
     dynamic error,
-    StackTrace? stack, {
-    Map<String, Object?>? customParameters,
+    StackTrace? stackTrace, {
+    Map<String, String>? customParameters,
     Map<String, Object?>? analyticsAttributes,
-  }) async {
-    final errorType = error.runtimeType.toString();
-    final errorMessage = error.toString();
-
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Recording fatal error');
-      debugPrint('  Error type: $errorType');
-      debugPrint('  Error message: $errorMessage');
+  }) {
+    // Set any custom keys for better error analysis
+    if (customParameters != null) {
+      for (final entry in customParameters.entries) {
+        _crashlytics.setCustomKey(entry.key, entry.value);
+      }
     }
 
-    // Send to Crashlytics
-    await crashlytics.recordError(
+    // Record the error as fatal
+    _crashlytics.recordError(
       error,
-      stack,
+      stackTrace,
+      reason: customParameters?['message'] ?? 'Fatal error',
       fatal: true,
-      information: customParameters?.entries.map<Object>((e) => '${e.key}: ${e.value}') ?? [],
     );
 
-    // Send analytics event for the error
-    final analyticsParams = <String, Object?>{
-      'error_type': errorType,
-      'error_message': errorMessage,
-      'is_fatal': 'true',
-    };
+    // Also log to analytics if attributes provided
     if (analyticsAttributes != null) {
-      analyticsParams.addAll(analyticsAttributes);
-    }
-
-    await logEvent('fatal_error', analyticsParams.cast<String, Object?>());
-
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Fatal error recorded');
+      final Map<String, Object> firebaseParams = analyticsAttributes.map(
+        (key, value) => MapEntry(key, value as Object),
+      );
+      _analytics.logEvent(name: 'app_fatal_error', parameters: firebaseParams);
     }
   }
 
-  /// Force an immediate crash and send analytics event
-  void forceCrash({Map<String, Object?>? analyticsAttributes}) async {
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Forcing crash');
-    }
-
-    // Send analytics event before crashing
-    final analyticsParams = <String, Object?>{'crash_method': 'force_crash', 'is_fatal': 'true'};
-    if (analyticsAttributes != null) {
-      analyticsParams.addAll(analyticsAttributes);
-    }
-
-    await logEvent('forced_crash', analyticsParams.cast<String, Object?>());
-
-    // Force the crash
-    crashlytics.crash();
+  /// Logs a screen view to Firebase Analytics
+  Future<void> logScreenView(String screenName, String screenClass) async {
+    await _analytics.logScreenView(screenName: screenName, screenClass: screenClass);
   }
 
-  /// Set a user identifier for Crashlytics and Analytics
-  Future<void> setUserId(String userId) async {
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Setting user ID: $userId');
-    }
-    await crashlytics.setUserIdentifier(userId);
-    await analytics.setUserId(id: userId);
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: User ID set');
-    }
-  }
+  /// Logs an event to Firebase Analytics
+  Future<void> logEvent(String eventName, Map<String, dynamic>? parameters) async {
+    // Convert to required Firebase parameter type
+    final Map<String, Object>? firebaseParams = parameters != null
+        ? parameters.map((key, value) => MapEntry(key, value as Object))
+        : null;
 
-  /// Set a custom key-value pair for the current crash report
-  Future<void> setCustomKey(String key, String value) async {
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Setting custom key: $key=$value');
-    }
-    await crashlytics.setCustomKey(key, value);
-  }
-
-  /// Log a custom crash attribute
-  Future<void> log(String message) async {
-    if (kDebugMode) {
-      debugPrint('AnalyticsManager: Logging message: $message');
-    }
-    await crashlytics.log(message);
+    await _analytics.logEvent(name: eventName, parameters: firebaseParams);
   }
 }

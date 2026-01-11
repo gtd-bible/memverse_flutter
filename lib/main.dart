@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/app/app.dart';
 import 'package:mini_memverse/src/bootstrap.dart';
+import 'package:mini_memverse/src/common/providers/talker_provider.dart';
 
 import 'firebase_options.dart';
 import 'services/analytics_manager.dart';
@@ -92,7 +94,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Check for required environment variables
-  var memverseClientId = const String.fromEnvironment('MEMVERSE_CLIENT_ID');
+  final memverseClientId = const String.fromEnvironment('MEMVERSE_CLIENT_ID');
   final clientSecret = const String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
 
   if (kDebugMode) {
@@ -142,6 +144,7 @@ Future<void> main() async {
       );
       AnalyticsManager.instance.crashlytics.recordFlutterFatalError(errorDetails);
     };
+
     PlatformDispatcher.instance.onError = (error, stack) {
       AppLogger.e('Platform error caught by global handler', error, stack);
       AnalyticsManager.instance.crashlytics.recordError(error, stack, fatal: true);
@@ -159,7 +162,14 @@ Future<void> main() async {
     AppLogger.i('🌍 Using API URL: https://www.memverse.com');
     AppLogger.i('🚀 Firebase Analytics initialized');
 
-    // Initialize the app
+    // Create a temporary ProviderContainer to access the talker provider
+    final container = ProviderContainer();
+
+    // Get the talker instance and set up global error handling
+    final talker = container.read(talkerProvider);
+    FlutterError.onError = (details) => talker.handle(details.exception, details.stack);
+
+    // Initialize the app with Riverpod
     await bootstrap(() => const App());
   } catch (error, stackTrace) {
     AppLogger.e('Fatal error during initialization', error, stackTrace);

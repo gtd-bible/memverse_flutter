@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/services/analytics_manager.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';
+import 'package:mini_memverse/src/common/widgets/build_info.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mini_memverse/src/features/settings/presentation/analytics_provider.dart';
 import 'package:mini_memverse/src/features/settings/presentation/theme_provider.dart';
@@ -22,6 +23,10 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isAlphaTester = ref.watch(alphaTesterProvider);
     final isBetaTester = ref.watch(betaTesterProvider);
+    final analyticsManager = AnalyticsManager.instance;
+
+    // Send app info to analytics on settings screen view
+    _sendAppInfoToAnalytics(ref);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -59,6 +64,9 @@ class SettingsScreen extends ConsumerWidget {
             },
             secondary: const Icon(Icons.bug_report),
           ),
+
+          // Always show build information
+          const BuildInfoText(),
 
           // Logs
           const _SettingsHeader(title: 'Diagnostics'),
@@ -119,6 +127,46 @@ class SettingsScreen extends ConsumerWidget {
     // Set custom keys in Crashlytics
     crashlytics.setCustomKey('alpha_tester', isAlpha);
     crashlytics.setCustomKey('beta_tester', isBeta);
+  }
+
+  void _sendAppInfoToAnalytics(WidgetRef ref) {
+    ref.watch(
+      packageInfoProvider.selectAsync((packageInfo) {
+        final analyticsManager = AnalyticsManager.instance;
+
+        // Create app info map
+        final Map<String, String> appInfo = {
+          'app_name': packageInfo.appName,
+          'package_name': packageInfo.packageName,
+          'version': packageInfo.version,
+          'build_number': packageInfo.buildNumber,
+          'build_type': AnalyticsManager.testerType.isEmpty
+              ? 'release'
+              : AnalyticsManager.testerType,
+        };
+
+        // Send app info to analytics
+        analyticsManager.logEvent('app_info_viewed', appInfo);
+
+        // Set user properties for app version info
+        analyticsManager.analytics.setUserProperty(name: 'app_version', value: packageInfo.version);
+        analyticsManager.analytics.setUserProperty(
+          name: 'build_number',
+          value: packageInfo.buildNumber,
+        );
+        analyticsManager.analytics.setUserProperty(
+          name: 'build_type',
+          value: appInfo['build_type'],
+        );
+
+        // Add to crashlytics as well
+        analyticsManager.crashlytics.setCustomKey('app_version', packageInfo.version);
+        analyticsManager.crashlytics.setCustomKey('build_number', packageInfo.buildNumber);
+        analyticsManager.crashlytics.setCustomKey('build_type', appInfo['build_type'] as String);
+
+        return packageInfo;
+      }),
+    );
   }
 }
 
