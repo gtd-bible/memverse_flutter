@@ -1,0 +1,25 @@
+Instructions for creating icon files:
+
+1. Since we can't directly create binary PNG files through this interface, you'll need to create PNG files manually:
+
+   - Use the SVG files we've created in the assets/icons directory:
+     - app_icon.svg (full icon with book and MV text)
+     - app_icon_foreground.svg (just the MV text for adaptive icons)
+   
+   - Convert these SVGs to PNGs using one of these methods:
+     a) Use an online converter like https://svgtopng.com/
+     b) Use Inkscape or another SVG editor
+     c) Use ImageMagick command: `convert app_icon.svg app_icon.png`
+     d) Run the provided generate_png_icons.dart script in a Flutter environment
+
+2. After generating the PNG files, name them:
+   - app_icon.png (main icon for all platforms)
+   - app_icon_foreground.png (foreground for Android adaptive icons)
+
+3. Then run the flutter_launcher_icons package to generate all platform icons:
+   ```
+   flutter pub get
+   flutter pub run flutter_launcher_icons
+   ```
+
+This will replace all platform-specific icons with your new custom MV Bible memorization app icon.
