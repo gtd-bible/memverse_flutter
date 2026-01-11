@@ -14,11 +14,9 @@ class BootstrapValues {
 
 /// Provider for bootstrap values
 final bootstrapProvider = Provider<BootstrapValues>((ref) {
-  // Get the client ID and secret from dart-define
-  // Use MEMVERSE_ prefixes to match documentation and .zshrc variables
-  const clientId = String.fromEnvironment('MEMVERSE_CLIENT_ID');
-
-  const memVerseClientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
+  // Get the client ID and secret from centralized app constants
+  const clientId = memverseClientId;
+  const memVerseClientSecret = memverseClientSecret;
 
   // Validate that the MEMVERSE_CLIENT_ID is provided
   if (clientId.isEmpty) {

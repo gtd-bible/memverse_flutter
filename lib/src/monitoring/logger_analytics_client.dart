@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
+
 import 'analytics_client.dart';
 
 /// A simple implementation of [AnalyticsClient] that logs events to the console.
@@ -11,6 +13,17 @@ class LoggerAnalyticsClient implements AnalyticsClient {
   const LoggerAnalyticsClient();
 
   static const _name = 'Analytics';
+
+  @override
+  Future<void> initialize() async {
+    log('initialize', name: _name);
+    log('Analytics logger initialized in ${kDebugMode ? 'DEBUG' : 'RELEASE'} mode', name: _name);
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    log('setUserId(userId: ${userId ?? 'null'})', name: _name);
+  }
 
   @override
   Future<void> trackLogin() async {
@@ -80,5 +93,34 @@ class LoggerAnalyticsClient implements AnalyticsClient {
   @override
   Future<void> trackVerseShared() async {
     log('trackVerseShared', name: _name);
+  }
+
+  @override
+  Future<void> recordError(
+    dynamic error,
+    StackTrace? stackTrace, {
+    String? reason,
+    bool fatal = false,
+    Map<String, dynamic>? additionalData,
+  }) async {
+    log('recordError(error: $error, reason: $reason, fatal: $fatal)', name: _name);
+    log('Stack trace: ${stackTrace?.toString() ?? 'Not provided'}', name: _name);
+
+    if (additionalData != null) {
+      log('Additional data: $additionalData', name: _name);
+    }
+  }
+
+  @override
+  Future<void> logScreenView(String screenName, String screenClass) async {
+    log('logScreenView(screenName: $screenName, screenClass: $screenClass)', name: _name);
+  }
+
+  @override
+  Future<void> logEvent(String eventName, {Map<String, dynamic>? parameters}) async {
+    log(
+      'logEvent(eventName: $eventName${parameters != null ? ', parameters: $parameters' : ''})',
+      name: _name,
+    );
   }
 }

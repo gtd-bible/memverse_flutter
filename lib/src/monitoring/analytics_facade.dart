@@ -23,8 +23,7 @@ class AnalyticsFacade implements AnalyticsClient {
   Future<void> trackSignUp() => _dispatch((c) => c.trackSignUp());
 
   @override
-  Future<void> trackVerseSessionStarted() =>
-      _dispatch((c) => c.trackVerseSessionStarted());
+  Future<void> trackVerseSessionStarted() => _dispatch((c) => c.trackVerseSessionStarted());
 
   @override
   Future<void> trackVerseSessionCompleted(int verseCount) =>
@@ -34,12 +33,10 @@ class AnalyticsFacade implements AnalyticsClient {
   Future<void> trackVerseAdded() => _dispatch((c) => c.trackVerseAdded());
 
   @override
-  Future<void> trackVerseSearch(String query) =>
-      _dispatch((c) => c.trackVerseSearch(query));
+  Future<void> trackVerseSearch(String query) => _dispatch((c) => c.trackVerseSearch(query));
 
   @override
-  Future<void> trackVerseRated(int rating) =>
-      _dispatch((c) => c.trackVerseRated(rating));
+  Future<void> trackVerseRated(int rating) => _dispatch((c) => c.trackVerseRated(rating));
 
   @override
   Future<void> trackDashboardView() => _dispatch((c) => c.trackDashboardView());
@@ -62,8 +59,7 @@ class AnalyticsFacade implements AnalyticsClient {
   Future<void> trackVerseShared() => _dispatch((c) => c.trackVerseShared());
 
   /// Dispatches a call to all registered clients
-  Future<void> _dispatch(
-      Future<void> Function(AnalyticsClient client) work) async {
+  Future<void> _dispatch(Future<void> Function(AnalyticsClient client) work) async {
     for (final client in clients) {
       await work(client);
     }

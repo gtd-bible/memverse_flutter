@@ -24,9 +24,9 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
     return FakeUserRepository();
   }
 
-  // Get client credentials from environment variables
-  const clientId = String.fromEnvironment('MEMVERSE_CLIENT_ID');
-  const clientSecret = String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
+  // Get client credentials from app constants
+  const clientId = memverseClientId;
+  const clientSecret = memverseClientSecret;
 
   return ApiUserRepository(dio: dio, clientId: clientId, clientSecret: clientSecret);
 });

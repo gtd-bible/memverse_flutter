@@ -8,6 +8,7 @@ import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/src/app/app.dart';
 import 'package:mini_memverse/src/bootstrap.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';
+import 'package:mini_memverse/src/constants/app_constants.dart' as app_constants;
 
 import 'firebase_options.dart';
 import 'services/analytics_manager.dart';
@@ -93,9 +94,9 @@ Future<void> main() async {
   // Initialize Flutter binding
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Check for required environment variables
-  final memverseClientId = const String.fromEnvironment('MEMVERSE_CLIENT_ID');
-  final clientSecret = const String.fromEnvironment('MEMVERSE_CLIENT_API_KEY');
+  // Check for required environment variables from app_constants.dart
+  final memverseClientId = app_constants.memverseClientId;
+  final clientSecret = app_constants.memverseClientSecret;
 
   if (kDebugMode) {
     debugPrint('🔍 Checking environment variables:');
