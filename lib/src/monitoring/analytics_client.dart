@@ -5,6 +5,12 @@ import 'dart:async';
 /// This abstract class defines all events that can be tracked in the app,
 /// providing a contract that all analytics implementations must follow.
 abstract class AnalyticsClient {
+  /// Initialize the analytics client
+  Future<void> initialize();
+
+  /// Set a user identifier for personalized analytics
+  Future<void> setUserId(String? userId);
+
   /// Track when a user successfully logs in
   Future<void> trackLogin();
 
@@ -46,4 +52,19 @@ abstract class AnalyticsClient {
 
   /// Track when a user shares a verse
   Future<void> trackVerseShared();
+
+  /// Record a non-fatal error with stack trace
+  Future<void> recordError(
+    dynamic error,
+    StackTrace? stackTrace, {
+    String? reason,
+    bool fatal = false,
+    Map<String, dynamic>? additionalData,
+  });
+
+  /// Log a screen view
+  Future<void> logScreenView(String screenName, String screenClass);
+
+  /// Log a custom event with parameters
+  Future<void> logEvent(String eventName, {Map<String, dynamic>? parameters});
 }

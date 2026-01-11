@@ -1,17 +1,22 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mini_memverse/src/monitoring/firebase_analytics_client.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
 
+class MockFirebaseCrashlytics extends Mock implements FirebaseCrashlytics {}
+
 void main() {
   late MockFirebaseAnalytics mockAnalytics;
+  late MockFirebaseCrashlytics mockCrashlytics;
   late FirebaseAnalyticsClient analyticsClient;
 
   setUp(() {
     mockAnalytics = MockFirebaseAnalytics();
-    analyticsClient = FirebaseAnalyticsClient(mockAnalytics);
+    mockCrashlytics = MockFirebaseCrashlytics();
+    analyticsClient = FirebaseAnalyticsClient(mockAnalytics, mockCrashlytics);
 
     // Register fallbacks for common parameter types
     registerFallbackValue(<String, Object>{}); // For parameters in logEvent

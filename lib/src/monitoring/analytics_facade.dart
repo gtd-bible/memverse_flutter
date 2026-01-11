@@ -14,6 +14,12 @@ class AnalyticsFacade implements AnalyticsClient {
   final List<AnalyticsClient> clients;
 
   @override
+  Future<void> initialize() => _dispatch((c) => c.initialize());
+
+  @override
+  Future<void> setUserId(String? userId) => _dispatch((c) => c.setUserId(userId));
+
+  @override
   Future<void> trackLogin() => _dispatch((c) => c.trackLogin());
 
   @override
@@ -57,6 +63,31 @@ class AnalyticsFacade implements AnalyticsClient {
 
   @override
   Future<void> trackVerseShared() => _dispatch((c) => c.trackVerseShared());
+
+  @override
+  Future<void> recordError(
+    dynamic error,
+    StackTrace? stackTrace, {
+    String? reason,
+    bool fatal = false,
+    Map<String, dynamic>? additionalData,
+  }) => _dispatch(
+    (c) => c.recordError(
+      error,
+      stackTrace,
+      reason: reason,
+      fatal: fatal,
+      additionalData: additionalData,
+    ),
+  );
+
+  @override
+  Future<void> logScreenView(String screenName, String screenClass) =>
+      _dispatch((c) => c.logScreenView(screenName, screenClass));
+
+  @override
+  Future<void> logEvent(String eventName, {Map<String, dynamic>? parameters}) =>
+      _dispatch((c) => c.logEvent(eventName, parameters: parameters));
 
   /// Dispatches a call to all registered clients
   Future<void> _dispatch(Future<void> Function(AnalyticsClient client) work) async {
