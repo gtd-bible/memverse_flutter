@@ -15,8 +15,11 @@ class App extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final talker = ref.read(talkerProvider);
 
-    return Builder(
-      builder: (context) {
+    return MaterialApp(
+      theme: AppThemes.light,
+      darkTheme: AppThemes.dark,
+      themeMode: themeMode,
+      builder: (context, child) {
         final isDarkMode =
             themeMode == ThemeMode.dark ||
             (themeMode == ThemeMode.system &&
@@ -27,15 +30,11 @@ class App extends ConsumerWidget {
           child: TalkerWrapper(
             talker: talker,
             options: const TalkerWrapperOptions(enableErrorAlerts: true),
-            child: MaterialApp(
-              theme: AppThemes.light,
-              darkTheme: AppThemes.dark,
-              themeMode: themeMode,
-              home: const AuthWrapper(),
-            ),
+            child: child!,
           ),
         );
       },
+      home: const AuthWrapper(),
     );
   }
 }

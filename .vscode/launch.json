@@ -7,7 +7,7 @@
       "request": "launch",
       "program": "lib/main.dart",
       "args": [
-        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
         "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}"
       ],
       "env": {
@@ -20,7 +20,7 @@
       "request": "launch",
       "program": "lib/main.dart",
       "args": [
-        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
         "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}"
       ],
       "deviceId": "ios"
@@ -31,7 +31,7 @@
       "request": "launch",
       "program": "lib/main.dart",
       "args": [
-        "--dart-define=CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
         "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}"
       ],
       "deviceId": "android"

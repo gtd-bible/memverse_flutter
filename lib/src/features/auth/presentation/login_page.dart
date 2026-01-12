@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/common/widgets/build_info.dart';
@@ -14,17 +15,17 @@ const loginPasswordFieldKey = ValueKey('login_password_field');
 const loginButtonKey = ValueKey('login_button');
 const passwordVisibilityToggleKey = ValueKey('password_visibility_toggle');
 
-class LoginPage extends ConsumerWidget {
+class LoginPage extends HookConsumerWidget {
   const LoginPage({super.key = const ValueKey('login_page')});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = GlobalKey<FormState>();
-    final usernameController = TextEditingController();
-    final passwordController = TextEditingController();
-    final passwordFocusNode = FocusNode();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
+    final usernameController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final passwordFocusNode = useFocusNode();
     final authState = ref.watch(authStateProvider);
-    final isPasswordVisible = ValueNotifier(false);
+    final isPasswordVisible = useValueNotifier(false);
     final analyticsService = ref.read(analyticsServiceProvider);
 
     Future<bool> validateFormWithAnalytics() async {
@@ -153,7 +154,8 @@ class LoginPage extends ConsumerWidget {
                       }
                     },
                     externalVisibilityState: isPasswordVisible,
-                    onVisibilityToggle: analyticsService.trackPasswordVisibilityToggle,
+                    onVisibilityToggle: (bool isVisible) =>
+                        analyticsService.trackPasswordVisibilityToggle(isVisible),
                     // Hidden easter egg long press handler for the lock icon
                     onLeadingIconLongPress: kDebugMode
                         ? () {

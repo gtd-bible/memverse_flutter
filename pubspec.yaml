@@ -139,15 +139,15 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icons/vector_mv_icon.png"
   web:
     generate: true
-    image_path: "assets/icons/green_m_on_v.png"
+    image_path: "assets/icons/vector_mv_icon.png"
     background_color: "#fff"
     theme_color: "#3CAF50"
   windows:
     generate: true
-    image_path: "assets/icons/green_m_on_v.png"
+    image_path: "assets/icons/vector_mv_icon.png"
   macos:
     generate: true
-    image_path: "assets/icons/green_m_on_v.png"
+    image_path: "assets/icons/vector_mv_icon.png"
 
 flutter_native_splash:
   color: "#4CAF50"

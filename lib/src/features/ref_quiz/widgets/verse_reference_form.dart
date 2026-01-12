@@ -23,21 +23,19 @@ class VerseReferenceForm extends HookWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Container(
-        padding: const EdgeInsets.only(bottom: 8),
-      ),
+      Container(padding: const EdgeInsets.only(bottom: 8)),
       TextField(
         controller: answerController,
         focusNode: answerFocusNode,
         decoration: _getInputDecoration(),
-        onSubmitted: (_) => onSubmitAnswer(expectedReference),
+        onSubmitted: (_) => onSubmitAnswer(answerController.text.trim()),
       ),
       const SizedBox(height: 16),
       Align(
         alignment: Alignment.centerRight,
         child: ElevatedButton(
           key: const Key('submit-ref'),
-          onPressed: () => onSubmitAnswer(expectedReference),
+          onPressed: () => onSubmitAnswer(answerController.text.trim()),
           child: const Text('Submit'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

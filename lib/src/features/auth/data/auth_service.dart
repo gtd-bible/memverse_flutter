@@ -80,23 +80,31 @@ class AuthService {
         onRequest: (options, handler) {
           AppLogger.i('🚀 OAuth Request: ${options.method} ${options.uri}');
           AppLogger.i('📝 Headers: ${options.headers}');
-          AppLogger.i('📦 Data: ${options.data}');
+          if (kDebugMode) {
+            AppLogger.i('📦 Data: ${options.data}');
+          }
           AppLogger.i('📋 Content-Type: ${options.contentType}');
           handler.next(options);
         },
         onResponse: (response, handler) {
           AppLogger.i('✅ OAuth Response: ${response.statusCode}');
           AppLogger.i('📝 Response Headers: ${response.headers}');
-          AppLogger.i('📦 Response Data: ${response.data}');
+          if (kDebugMode) {
+            AppLogger.i('📦 Response Data: ${response.data}');
+          }
           handler.next(response);
         },
         onError: (error, handler) {
           AppLogger.error('❌ OAuth Error: ${error.message}');
           AppLogger.error('🔍 Request: ${error.requestOptions.method} ${error.requestOptions.uri}');
           AppLogger.error('📝 Request Headers: ${error.requestOptions.headers}');
-          AppLogger.error('📦 Request Data: ${error.requestOptions.data}');
+          if (kDebugMode) {
+            AppLogger.error('📦 Request Data: ${error.requestOptions.data}');
+          }
           if (error.response != null) {
-            AppLogger.error('📥 Error Response: ${error.response?.data}');
+            if (kDebugMode) {
+              AppLogger.error('📥 Error Response: ${error.response?.data}');
+            }
             AppLogger.error('🔢 Status Code: ${error.response?.statusCode}');
           }
           handler.next(error);

@@ -4,6 +4,44 @@ import 'package:dio/dio.dart';
 import 'package:mini_memverse/services/app_logger.dart';
 
 class CurlLoggingInterceptor extends Interceptor {
+  /// Whether to enable detailed curl logging (only in debug mode for security)
+  static const bool _enableDetailedLogging = false; // Set to true only for debugging OAuth issues
+
+  /// Headers that should be redacted in logs
+  static const _sensitiveHeaders = {'authorization', 'cookie', 'set-cookie'};
+
+  /// Data fields that should be redacted in logs
+  static const _sensitiveFields = {'password', 'client_secret', 'token', 'secret'};
+
+  /// Redacts sensitive header values
+  String _redactHeaderValue(String key, String value) {
+    final lowerKey = key.toLowerCase();
+    if (_sensitiveHeaders.contains(lowerKey) ||
+        lowerKey.contains('token') ||
+        lowerKey.contains('secret') ||
+        lowerKey.contains('password')) {
+      return '[REDACTED]';
+    }
+    return value;
+  }
+
+  /// Redacts sensitive data fields in maps
+  Map _redactSensitiveData(Map data) {
+    final redacted = <String, dynamic>{};
+    for (final entry in data.entries) {
+      final key = entry.key.toLowerCase();
+      if (_sensitiveFields.contains(key) ||
+          key.contains('token') ||
+          key.contains('secret') ||
+          key.contains('password')) {
+        redacted[entry.key] = '[REDACTED]';
+      } else {
+        redacted[entry.key] = entry.value;
+      }
+    }
+    return redacted;
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     _printCurlCommand(options);
@@ -45,15 +83,17 @@ class CurlLoggingInterceptor extends Interceptor {
           AppLogger.i('✅ OAuth URL matches successful curl command');
         }
 
-        // First log an easy copy-paste command for environment variables
-        final envCommand = '''
+        // First log an easy copy-paste command for environment variables (only if detailed logging enabled)
+        if (_enableDetailedLogging) {
+          final envCommand = '''
 curl -X POST "https://www.memverse.com/oauth/token" \\
   -H "Content-Type: application/x-www-form-urlencoded" \\
-  -d "grant_type=password&username=\$MEMVERSE_USERNAME&password=\$MEMVERSE_CORRECT_PASSWORD_DO_NOT_COMMIT&client_id=\$MEMVERSE_CLIENT_ID&client_secret=\$MEMVERSE_CLIENT_API_KEY" \\
+  -d "grant_type=password&username=\$MEMVERSE_USERNAME&password=[REDACTED]&client_id=\$MEMVERSE_CLIENT_ID&client_secret=[REDACTED]" \\
   -v
 ''';
-        AppLogger.i('🟢 COPY-PASTE CURL WITH ENV VARIABLES:');
-        AppLogger.i(envCommand);
+          AppLogger.i('🟢 COPY-PASTE CURL WITH ENV VARIABLES:');
+          AppLogger.i(envCommand);
+        }
 
         // Check content-type header
         final contentType = options.headers['Content-Type'] ?? options.contentType;
@@ -65,37 +105,39 @@ curl -X POST "https://www.memverse.com/oauth/token" \\
           AppLogger.i('✅ Content-Type matches successful curl command');
         }
 
-        // Check data format
-        if (options.data is! Map) {
-          AppLogger.e('❌ Data is not a Map! It should be key-value pairs for form data');
-        } else {
-          AppLogger.i('✅ Data is a Map as expected');
-          final dataMap = options.data as Map;
-
-          // Check required fields
-          final requiredFields = [
-            'grant_type',
-            'username',
-            'password',
-            'client_id',
-            'client_secret',
-          ];
-          final missingFields = requiredFields
-              .where((field) => !dataMap.containsKey(field))
-              .toList();
-
-          if (missingFields.isNotEmpty) {
-            AppLogger.e('❌ MISSING REQUIRED FIELDS: ${missingFields.join(', ')}');
+        // Check data format - only if detailed logging enabled
+        if (_enableDetailedLogging) {
+          if (options.data is! Map) {
+            AppLogger.e('❌ Data is not a Map! It should be key-value pairs for form data');
           } else {
-            AppLogger.i('✅ All required fields are present in the request body');
-          }
+            AppLogger.i('✅ Data is a Map as expected');
+            final dataMap = options.data as Map;
 
-          // Check if there are any unexpected fields
-          final unexpectedFields = dataMap.keys
-              .where((key) => !requiredFields.contains(key))
-              .toList();
-          if (unexpectedFields.isNotEmpty) {
-            AppLogger.w('⚠️ UNEXPECTED FIELDS IN BODY: ${unexpectedFields.join(', ')}');
+            // Check required fields (without logging values)
+            final requiredFields = [
+              'grant_type',
+              'username',
+              'password',
+              'client_id',
+              'client_secret',
+            ];
+            final missingFields = requiredFields
+                .where((field) => !dataMap.containsKey(field))
+                .toList();
+
+            if (missingFields.isNotEmpty) {
+              AppLogger.e('❌ MISSING REQUIRED FIELDS: ${missingFields.join(', ')}');
+            } else {
+              AppLogger.i('✅ All required fields are present in the request body');
+            }
+
+            // Check if there are any unexpected fields
+            final unexpectedFields = dataMap.keys
+                .where((key) => !requiredFields.contains(key))
+                .toList();
+            if (unexpectedFields.isNotEmpty) {
+              AppLogger.w('⚠️ UNEXPECTED FIELDS IN BODY: ${unexpectedFields.join(', ')}');
+            }
           }
         }
 
@@ -108,42 +150,49 @@ curl -X POST "https://www.memverse.com/oauth/token" \\
         }
       }
 
-      // Log the actual curl command based on the request
-      var curl = 'curl -X ${options.method.toUpperCase()} "$uri"';
+      // Log the actual curl command based on the request (only if detailed logging enabled)
+      if (_enableDetailedLogging) {
+        // Log the actual curl command based on the request
+        var curl = 'curl -X ${options.method.toUpperCase()} "$uri"';
 
-      // Add headers
-      options.headers.forEach((key, value) {
-        curl += ' \\\n  -H "$key: $value"';
-      });
+        // Add headers
+        options.headers.forEach((key, value) {
+          curl += ' \\\n  -H "$key: ${_redactHeaderValue(key, value)}"';
+        });
 
-      // Add data if present
-      if (options.data != null) {
-        if (options.contentType?.toLowerCase().contains('application/x-www-form-urlencoded') ==
-            true) {
-          // For form-urlencoded, format as form data
-          if (options.data is Map) {
-            final formData = (options.data as Map).entries
-                .map((e) => "${e.key}=${Uri.encodeComponent(e.value.toString())}")
-                .join('&');
-            curl += " \\\n  -d \"$formData\"";
+        // Add data if present
+        if (options.data != null) {
+          if (options.contentType?.toLowerCase().contains('application/x-www-form-urlencoded') ==
+              true) {
+            // For form-urlencoded, format as form data
+            if (options.data is Map) {
+              final redactedData = _redactSensitiveData(options.data);
+              final formData = redactedData.entries
+                  .map((e) => "${e.key}=${Uri.encodeComponent(e.value.toString())}")
+                  .join('&');
+              curl += " \\\n  -d \"$formData\"";
+            } else {
+              curl += " \\\n  -d \"${options.data.toString()}\"";
+            }
+          } else if (options.data is Map || options.data is List) {
+            final redactedData = options.data is Map
+                ? _redactSensitiveData(options.data)
+                : options.data;
+            final prettyJson = const JsonEncoder.withIndent('  ').convert(redactedData);
+            curl += " \\\n  -d '$prettyJson'";
+          } else if (options.data is String) {
+            curl += " \\\n  -d '${options.data.toString()}'";
           } else {
-            curl += " \\\n  -d \"${options.data.toString()}\"";
+            curl += " \\\n  -d '${options.data.toString()}'";
           }
-        } else if (options.data is Map || options.data is List) {
-          final prettyJson = const JsonEncoder.withIndent('  ').convert(options.data);
-          curl += " \\\n  -d '$prettyJson'";
-        } else if (options.data is String) {
-          curl += " \\\n  -d '${options.data}'";
-        } else {
-          curl += " \\\n  -d '${options.data}'";
         }
+
+        curl += ' \\\n  -v';
+
+        AppLogger.i('🟢 ACTUAL CURL COMMAND FROM REQUEST:');
+        AppLogger.i(curl);
+        AppLogger.i('---');
       }
-
-      curl += ' \\\n  -v';
-
-      AppLogger.i('🟢 ACTUAL CURL COMMAND FROM REQUEST:');
-      AppLogger.i(curl);
-      AppLogger.i('---');
     } catch (e) {
       AppLogger.e('Error creating curl command', e);
     }
@@ -160,7 +209,7 @@ curl -X POST "https://www.memverse.com/oauth/token" \\
     buffer.writeln('│ Content-Type: ${options.contentType}');
     buffer.writeln('│ Headers:');
     options.headers.forEach((key, value) {
-      buffer.writeln('│   $key: $value');
+      buffer.writeln('│   $key: ${_redactHeaderValue(key, value)}');
     });
 
     if (options.queryParameters.isNotEmpty) {
@@ -174,7 +223,10 @@ curl -X POST "https://www.memverse.com/oauth/token" \\
       buffer.writeln('│ Request Body:');
       if (options.data is Map || options.data is List) {
         try {
-          final prettyJson = const JsonEncoder.withIndent('  ').convert(options.data);
+          final redactedData = options.data is Map
+              ? _redactSensitiveData(options.data)
+              : options.data;
+          final prettyJson = const JsonEncoder.withIndent('  ').convert(redactedData);
           prettyJson.split('\n').forEach((line) {
             buffer.writeln('│   $line');
           });

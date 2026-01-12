@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mini_memverse/main.dart';
 
 /// Simple script to load env.json and launch the app
 /// Usage: flutter run --dart-define-from-file=env.json --dart-entry-point=run_with_env.dart
@@ -29,32 +27,24 @@ Future<void> main() async {
   // Show what's being used
   print('🚀 Starting with env.json configuration:');
   print('  Client ID: $clientId');
-  print('  API Key: ${apiKey.isNotEmpty ? "***${apiKey.substring(0, 8)}***" : "(NOT SET)"}');
+  print(
+    '  API Key: ${apiKey.isNotEmpty ? "***${apiKey.substring(0, min(8, apiKey.length))}***" : "(NOT SET)"}',
+  );
 
   // Import main and run the app with the loaded env vars
-  runApp(MyHelloWorldApp(
-    env: {
-      'CLIENT_ID': clientId,
-      'MEMVERSE_CLIENT_API_KEY': apiKey,
-    },
-  ));
+  runApp(MyHelloWorldApp(env: {'CLIENT_ID': clientId, 'MEMVERSE_CLIENT_API_KEY': apiKey}));
 }
 
 class MyHelloWorldApp extends StatelessWidget {
-  const MyHelloWorldApp({
-    this.env,
-    super.key,
-  });
+  const MyHelloWorldApp({this.env, super.key});
 
-  final Map<String, String> env;
-
-  const MyHelloWorldApp({required this.env, super.key});
+  final Map<String, String>? env;
 
   @override
   Widget build(BuildContext context) {
     // Extract environment from the env map for use in services
-    final clientId = env['CLIENT_ID'] ?? env['MEMVERSE_CLIENT_API_KEY'] ?? 'debug';
-    final apiSecret = env['MEMVERSE_CLIENT_API_KEY'];
+    final clientId = env?['CLIENT_ID'] ?? env?['MEMVERSE_CLIENT_API_KEY'] ?? 'debug';
+    final apiSecret = env?['MEMVERSE_CLIENT_API_KEY'];
 
     return MaterialApp(
       home: Scaffold(
@@ -71,18 +61,15 @@ class MyHelloWorldApp extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Client ID: $clientId',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 8),
               Text(
-                'API Key: ${apiSecret.isNotEmpty ? "***${apiSecret.substring(0, 8)}***" : "(NOT SET)"}',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                'API Key: ${apiSecret != null && apiSecret.isNotEmpty ? "***${apiSecret.substring(0, min(8, apiSecret.length))}***" : "(NOT SET)"}',
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 32),
-              Text(
-                'Ready to launch...',
-                style: TextStyle(fontSize: 16, color: Colors.green),
-              ),
+              const Text('Ready to launch...', style: TextStyle(fontSize: 16, color: Colors.green)),
             ],
           ),
         ),

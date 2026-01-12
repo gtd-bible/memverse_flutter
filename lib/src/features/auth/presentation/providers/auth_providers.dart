@@ -5,7 +5,6 @@ import 'package:mini_memverse/src/common/providers/talker_provider.dart';
 import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
-import 'package:mini_memverse/src/monitoring/analytics_client.dart';
 import 'package:mini_memverse/src/monitoring/analytics_facade.dart';
 import 'package:talker/talker.dart';
 
@@ -109,7 +108,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final isLoggedIn = await _authService.isLoggedIn();
     if (isLoggedIn) {
       final token = await _authService.getToken();
-      state = state.copyWith(isAuthenticated: true, isLoading: false, token: token);
+      state = state.copyWith(
+        isAuthenticated: token != null && token.accessToken.isNotEmpty,
+        isLoading: false,
+        token: token,
+      );
     } else {
       state = state.copyWith(isLoading: false);
     }
@@ -137,7 +140,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final token = await _authService.login(username, password, _clientId, _clientSecret);
 
       // Log token information (non-sensitive parts)
-      if (token.accessToken.isNotEmpty) {
+      if (token?.accessToken?.isNotEmpty == true) {
         AppLogger.i('Successfully authenticated');
 
         // Track successful login with both analytics systems
@@ -166,7 +169,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
         _talker.error('Login failed - Empty access token received');
       }
 
-      state = state.copyWith(isAuthenticated: true, isLoading: false, token: token);
+      state = state.copyWith(
+        isAuthenticated: token != null && token.accessToken.isNotEmpty,
+        isLoading: false,
+        token: token,
+      );
     } catch (e, stackTrace) {
       AppLogger.error('Login failed', e);
 

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/services/app_logger.dart';
@@ -64,7 +62,7 @@ abstract class AnalyticsService {
     properties: {
       'verses_answered': versesAnswered,
       'correct_answers': correctAnswers,
-      'accuracy': correctAnswers / versesAnswered,
+      'accuracy': versesAnswered > 0 ? correctAnswers / versesAnswered : 0.0,
     },
   );
 

@@ -22,10 +22,10 @@ fi
 # Print the exact command that will be run
 echo "========================================================================"
 echo "RUNNING EXACT COMMAND:"
-echo "flutter run -d $DEVICE_ID --dart-define=CLIENT_ID=$MEMVERSE_CLIENT_ID --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY"
+echo "flutter run -d $DEVICE_ID --dart-define=MEMVERSE_CLIENT_ID=$MEMVERSE_CLIENT_ID --dart-define=MEMVERSE_CLIENT_API_KEY=$MEMVERSE_CLIENT_API_KEY"
 echo "========================================================================"
 echo "Using environment variables from your .zshrc file:"
-echo "- CLIENT_ID receives value from: MEMVERSE_CLIENT_ID"
+echo "- MEMVERSE_CLIENT_ID receives value from: MEMVERSE_CLIENT_ID"
 echo "- MEMVERSE_CLIENT_API_KEY receives value from: MEMVERSE_CLIENT_API_KEY"
 echo "========================================================================"
 

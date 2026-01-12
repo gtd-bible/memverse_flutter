@@ -22,12 +22,7 @@ class FeedbackLogoutActions extends ConsumerWidget {
           ScaffoldMessenger.maybeOf(
             context,
           )?.showSnackBar(const SnackBar(content: Text('Thanks for your feedback!')));
-          await ref
-              .read(analyticsServiceProvider)
-              .track(
-                'feedback_submitted',
-                properties: {'text': feedback.text, 'with_screenshot': feedback.screenshot != null},
-              );
+          await ref.read(analyticsServiceProvider).track('feedback_submitted');
         }),
       ),
       IconButton(

@@ -168,10 +168,14 @@ class FirebaseAnalyticsClient implements AnalyticsClient {
 
   @override
   Future<void> logEvent(String eventName, {Map<String, dynamic>? parameters}) async {
-    // Convert to required Firebase parameter type
-    final Map<String, Object>? firebaseParams = parameters?.map(
-      (key, value) => MapEntry(key, value as Object),
-    );
+    // Convert to required Firebase parameter type, filtering out null values
+    final Map<String, Object>? firebaseParams = parameters == null
+        ? null
+        : Map.fromEntries(
+            parameters.entries
+                .where((entry) => entry.value != null)
+                .map((entry) => MapEntry(entry.key, entry.value as Object)),
+          );
 
     await _analytics.logEvent(name: eventName, parameters: firebaseParams);
   }
