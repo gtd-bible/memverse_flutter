@@ -108,9 +108,8 @@ void main() async {
           print('[DEBUG] Translation: ${firstVerse['translation'] ?? 'Unknown'}');
 
           // Also print a sample of the raw response for debugging
-          print('\n🔍 [DEBUG] First verse raw data (sample):');
-          final verseKeys = firstVerse.keys.take(5); // Show first 5 keys
-          for (final key in verseKeys) {
+          print('\n🔍 [DEBUG] First verse raw data (complete):');
+          for (final key in firstVerse.keys) {
             final value = firstVerse[key];
             // Redact sensitive data in debug output
             final displayValue =

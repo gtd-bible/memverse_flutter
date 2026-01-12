@@ -1,17 +1,18 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mini_memverse/services/app_logger.dart';
+import 'package:mini_memverse/services/app_logger_facade.dart';
 import 'package:mini_memverse/src/app/app.dart';
 import 'package:mini_memverse/src/bootstrap.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';
 import 'package:mini_memverse/src/constants/app_constants.dart' as app_constants;
+import 'package:mini_memverse/src/monitoring/analytics_facade.dart';
 
 import 'firebase_options.dart';
-import 'services/analytics_manager.dart';
 
 /// Error widget shown when required configuration is missing
 class ConfigurationErrorWidget extends StatelessWidget {
@@ -136,48 +137,85 @@ Future<void> main() async {
     // Initialize Firebase
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    // Set up Firebase error handlers
+    // Create a ProviderContainer to access providers
+    final container = ProviderContainer();
+
+    // Get the analytics facade for error tracking
+    final analyticsFacade = container.read(analyticsFacadeProvider);
+
+    // Get the logger facade
+    final appLogger = container.read(appLoggerFacadeProvider);
+
+    // Get the talker instance
+    final talker = container.read(talkerProvider);
+
+    // Set up error handlers
     FlutterError.onError = (errorDetails) {
-      AppLogger.e(
+      // Log the error with our logger facade
+      appLogger.error(
         'Flutter error caught by global handler',
         errorDetails.exception,
         errorDetails.stack,
+        true, // record to crashlytics
+        {
+          'error_context': 'FlutterError.onError',
+          'library': errorDetails.library ?? 'unknown',
+          'context': errorDetails.context?.toString() ?? 'unknown',
+        },
       );
-      AnalyticsManager.instance.crashlytics.recordFlutterFatalError(errorDetails);
+
+      // Also send to talker for UI display
+      talker.handle(errorDetails.exception, errorDetails.stack);
     };
 
     PlatformDispatcher.instance.onError = (error, stack) {
-      AppLogger.e('Platform error caught by global handler', error, stack);
-      AnalyticsManager.instance.crashlytics.recordError(error, stack, fatal: true);
+      // Log the fatal error with our logger facade
+      appLogger.fatal('Platform error caught by global handler', error, stack, {
+        'error_context': 'PlatformDispatcher.onError',
+      });
+
+      // Also send to talker for UI display
+      talker.handle(error, stack);
+
       return true;
     };
 
-    // Logging initialization
-    AppLogger.i('🌟 App starting with configuration:');
-    AppLogger.i(
+    // Log initialization success
+    appLogger.i('🌟 App starting with configuration:');
+    appLogger.i(
       '🔐 MEMVERSE_CLIENT_ID: ${memverseClientId.substring(0, 3)}...${memverseClientId.substring(memverseClientId.length - 3)} (${memverseClientId.length} chars)',
     );
-    AppLogger.i(
+    appLogger.i(
       '🔑 MEMVERSE_CLIENT_API_KEY: ${clientSecret.substring(0, 3)}...${clientSecret.substring(clientSecret.length - 3)} (${clientSecret.length} chars)',
     );
-    AppLogger.i('🌍 Using API URL: https://www.memverse.com');
-    AppLogger.i('🚀 Firebase Analytics initialized');
-
-    // Create a temporary ProviderContainer to access the talker provider
-    final container = ProviderContainer();
-
-    // Get the talker instance and set up global error handling
-    final talker = container.read(talkerProvider);
-    FlutterError.onError = (details) => talker.handle(details.exception, details.stack);
+    appLogger.i('🌍 Using API URL: https://www.memverse.com');
+    appLogger.i('🚀 Firebase Analytics initialized');
 
     // Initialize the app with Riverpod
     await bootstrap(() => const App());
   } catch (error, stackTrace) {
-    AppLogger.e('Fatal error during initialization', error, stackTrace);
+    // Fall back to direct logging if our logger setup fails
     if (kDebugMode) {
       debugPrint('💥 FATAL ERROR: $error');
       debugPrint(stackTrace.toString());
     }
-    rethrow; // Let the platform handle the fatal error
+
+    // Try to record to crashlytics directly as a last resort
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'Fatal initialization error',
+      );
+    } catch (e) {
+      // Nothing more we can do - this is a catastrophic failure
+      if (kDebugMode) {
+        debugPrint('💥 CATASTROPHIC: Failed to report initialization error: $e');
+      }
+    }
+
+    // Let the platform handle the fatal error
+    rethrow;
   }
 }

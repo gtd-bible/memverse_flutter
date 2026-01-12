@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mini_memverse/services/app_logger.dart';
 import 'package:mini_memverse/services/app_logger_facade.dart';
 import 'package:mini_memverse/src/common/providers/bootstrap_provider.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';

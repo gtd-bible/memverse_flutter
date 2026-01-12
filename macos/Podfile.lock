@@ -1,51 +1,40 @@
 PODS:
   - CocoaAsyncSocket (7.6.5)
   - device_info_plus (0.0.1):
-    - Flutter
+    - FlutterMacOS
   - Firebase/CoreOnly (12.6.0):
     - FirebaseCore (~> 12.6.0)
   - Firebase/Crashlytics (12.6.0):
     - Firebase/CoreOnly
     - FirebaseCrashlytics (~> 12.6.0)
-  - Firebase/InAppMessaging (12.6.0):
-    - Firebase/CoreOnly
-    - FirebaseInAppMessaging (~> 12.6.0-beta)
   - Firebase/Messaging (12.6.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 12.6.0)
-  - Firebase/Performance (12.6.0):
-    - Firebase/CoreOnly
-    - FirebasePerformance (~> 12.6.0)
   - Firebase/RemoteConfig (12.6.0):
     - Firebase/CoreOnly
     - FirebaseRemoteConfig (~> 12.6.0)
   - firebase_analytics (12.1.0):
     - firebase_core
     - FirebaseAnalytics (= 12.6.0)
-    - Flutter
+    - FlutterMacOS
   - firebase_core (4.3.0):
-    - Firebase/CoreOnly (= 12.6.0)
-    - Flutter
+    - Firebase/CoreOnly (~> 12.6.0)
+    - FlutterMacOS
   - firebase_crashlytics (5.0.6):
-    - Firebase/Crashlytics (= 12.6.0)
+    - Firebase/CoreOnly (~> 12.6.0)
+    - Firebase/Crashlytics (~> 12.6.0)
     - firebase_core
-    - Flutter
-  - firebase_in_app_messaging (0.9.0-5):
-    - Firebase/InAppMessaging (= 12.6.0)
-    - firebase_core
-    - Flutter
+    - FlutterMacOS
   - firebase_messaging (16.1.0):
-    - Firebase/Messaging (= 12.6.0)
+    - Firebase/CoreOnly (~> 12.6.0)
+    - Firebase/Messaging (~> 12.6.0)
     - firebase_core
-    - Flutter
-  - firebase_performance (0.11.1-3):
-    - Firebase/Performance (= 12.6.0)
-    - firebase_core
-    - Flutter
+    - FlutterMacOS
   - firebase_remote_config (6.1.3):
-    - Firebase/RemoteConfig (= 12.6.0)
+    - Firebase/CoreOnly (~> 12.6.0)
+    - Firebase/RemoteConfig (~> 12.6.0)
     - firebase_core
-    - Flutter
+    - FlutterMacOS
   - FirebaseABTesting (12.6.0):
     - FirebaseCore (~> 12.6.0)
   - FirebaseAnalytics (12.6.0):
@@ -83,13 +72,6 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
-  - FirebaseInAppMessaging (12.6.0-beta):
-    - FirebaseABTesting (~> 12.6.0)
-    - FirebaseCore (~> 12.6.0)
-    - FirebaseInstallations (~> 12.6.0)
-    - GoogleUtilities/Environment (~> 8.1)
-    - GoogleUtilities/UserDefaults (~> 8.1)
-    - nanopb (~> 3.30910.0)
   - FirebaseInstallations (12.6.0):
     - FirebaseCore (~> 12.6.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -102,16 +84,6 @@ PODS:
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Reachability (~> 8.1)
-    - GoogleUtilities/UserDefaults (~> 8.1)
-    - nanopb (~> 3.30910.0)
-  - FirebasePerformance (12.6.0):
-    - FirebaseCore (~> 12.6.0)
-    - FirebaseInstallations (~> 12.6.0)
-    - FirebaseRemoteConfig (~> 12.6.0)
-    - FirebaseSessions (~> 12.6.0)
-    - GoogleDataTransport (~> 10.1)
-    - GoogleUtilities/Environment (~> 8.1)
-    - GoogleUtilities/MethodSwizzler (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - nanopb (~> 3.30910.0)
   - FirebaseRemoteConfig (12.6.0):
@@ -133,16 +105,9 @@ PODS:
     - nanopb (~> 3.30910.0)
     - PromisesSwift (~> 2.1)
   - FirebaseSharedSwift (12.6.0)
-  - Flutter (1.0.0)
-  - flutter_native_splash (2.4.3):
-    - Flutter
-  - flutter_secure_storage (6.0.0):
-    - Flutter
-  - GoogleAdsOnDeviceConversion (3.2.0):
-    - GoogleUtilities/Environment (~> 8.1)
-    - GoogleUtilities/Logger (~> 8.1)
-    - GoogleUtilities/Network (~> 8.1)
-    - nanopb (~> 3.30910.0)
+  - flutter_secure_storage_macos (6.1.3):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
   - GoogleAppMeasurement/Core (12.6.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/MethodSwizzler (~> 8.1)
@@ -195,15 +160,13 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - integration_test (0.0.1):
-    - Flutter
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
-  - package_info_plus (0.4.5):
-    - Flutter
+  - package_info_plus (0.0.1):
+    - FlutterMacOS
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -214,32 +177,25 @@ PODS:
   - PromisesObjC (2.4.0)
   - PromisesSwift (2.4.0):
     - PromisesObjC (= 2.4.0)
-  - screenshot_callback (0.0.1):
-    - Flutter
   - share_plus (0.0.1):
-    - Flutter
-  - url_launcher_ios (0.0.1):
-    - Flutter
+    - FlutterMacOS
+  - url_launcher_macos (0.0.1):
+    - FlutterMacOS
 
 DEPENDENCIES:
-  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
-  - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
-  - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
-  - firebase_in_app_messaging (from `.symlinks/plugins/firebase_in_app_messaging/ios`)
-  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
-  - firebase_performance (from `.symlinks/plugins/firebase_performance/ios`)
-  - firebase_remote_config (from `.symlinks/plugins/firebase_remote_config/ios`)
-  - Flutter (from `Flutter`)
-  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
-  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - integration_test (from `.symlinks/plugins/integration_test/ios`)
-  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - patrol (from `.symlinks/plugins/patrol/darwin`)
-  - screenshot_callback (from `.symlinks/plugins/screenshot_callback/ios`)
-  - share_plus (from `.symlinks/plugins/share_plus/ios`)
-  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
+  - firebase_analytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_analytics/macos`)
+  - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
+  - firebase_crashlytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos`)
+  - firebase_messaging (from `Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos`)
+  - firebase_remote_config (from `Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos`)
+  - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
+  - patrol (from `Flutter/ephemeral/.symlinks/plugins/patrol/darwin`)
+  - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
+  - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 SPEC REPOS:
   trunk:
@@ -251,15 +207,12 @@ SPEC REPOS:
     - FirebaseCoreExtension
     - FirebaseCoreInternal
     - FirebaseCrashlytics
-    - FirebaseInAppMessaging
     - FirebaseInstallations
     - FirebaseMessaging
-    - FirebasePerformance
     - FirebaseRemoteConfig
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - FirebaseSharedSwift
-    - GoogleAdsOnDeviceConversion
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
@@ -269,85 +222,67 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   device_info_plus:
-    :path: ".symlinks/plugins/device_info_plus/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   firebase_analytics:
-    :path: ".symlinks/plugins/firebase_analytics/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_analytics/macos
   firebase_core:
-    :path: ".symlinks/plugins/firebase_core/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_core/macos
   firebase_crashlytics:
-    :path: ".symlinks/plugins/firebase_crashlytics/ios"
-  firebase_in_app_messaging:
-    :path: ".symlinks/plugins/firebase_in_app_messaging/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos
   firebase_messaging:
-    :path: ".symlinks/plugins/firebase_messaging/ios"
-  firebase_performance:
-    :path: ".symlinks/plugins/firebase_performance/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos
   firebase_remote_config:
-    :path: ".symlinks/plugins/firebase_remote_config/ios"
-  Flutter:
-    :path: Flutter
-  flutter_native_splash:
-    :path: ".symlinks/plugins/flutter_native_splash/ios"
-  flutter_secure_storage:
-    :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  integration_test:
-    :path: ".symlinks/plugins/integration_test/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos
+  flutter_secure_storage_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
   package_info_plus:
-    :path: ".symlinks/plugins/package_info_plus/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   patrol:
-    :path: ".symlinks/plugins/patrol/darwin"
-  screenshot_callback:
-    :path: ".symlinks/plugins/screenshot_callback/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/patrol/darwin
   share_plus:
-    :path: ".symlinks/plugins/share_plus/ios"
-  url_launcher_ios:
-    :path: ".symlinks/plugins/url_launcher_ios/ios"
+    :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
+  url_launcher_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
-  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   Firebase: a451a7b61536298fd5cbfe3a746fd40443a50679
-  firebase_analytics: 4f9cca09e65f6c2944a862c6dc86f6bed9fb769c
-  firebase_core: ba00a168e719694f38960502ceb560285603d073
-  firebase_crashlytics: 13f4b77e9ce2a84b1f8ea07f293db5b6213ce1cf
-  firebase_in_app_messaging: fbdbcc3699f5cd4833dba42f21e94763c3d3b88b
-  firebase_messaging: bf0e29321927edc02a563c984dbfa5b063864b15
-  firebase_performance: f533f51f345b71f4e20b37d9142add0d308ce7df
-  firebase_remote_config: 4315c34bfba52eb501b69cfa84d519f340385a37
+  firebase_analytics: d59fdb2c980c7975f249eafd51520a45d4050a77
+  firebase_core: 2ccd04fc130691db5f3d3cd9aa43ab430004c1e9
+  firebase_crashlytics: a2ffade1722840166ba9b05a5aa846a23cd84cb3
+  firebase_messaging: 80efbf2e975a91f612ce5b5d18c67e5a762fbdf8
+  firebase_remote_config: 20783f60ce833239435241c5d772c41883dd6d9f
   FirebaseABTesting: 119f0a2b2e68b1ae05d248c5adb2455f148f20c1
   FirebaseAnalytics: d0a97a0db6425e5a5d966340b87f92ca7b13a557
   FirebaseCore: 0e38ad5d62d980a47a64b8e9301ffa311457be04
   FirebaseCoreExtension: 032fd6f8509e591fda8cb76f6651f20d926b121f
   FirebaseCoreInternal: 69bf1306a05b8ac43004f6cc1f804bb7b05b229e
   FirebaseCrashlytics: 3d6248c50726ee7832aef0e53cb84c9e64d9fa7e
-  FirebaseInAppMessaging: f0b968a0bc2d2e6208205865ea973ddc858cb6c9
   FirebaseInstallations: 631b38da2e11a83daa4bfb482f79d286a5dfa7ad
   FirebaseMessaging: a61bc42dcab3f7a346d94bbb54dab2c9435b18b2
-  FirebasePerformance: 9a73b170cefb06e5da537682e30f86c9865880c5
   FirebaseRemoteConfig: c5dfe22828a7ae7673d16224ea92743687e993df
   FirebaseRemoteConfigInterop: 3443b8cb8fffd76bb3e03b2a84bfd3db952fcda4
   FirebaseSessions: 2e8f808347e665dff3e5843f275715f07045297d
   FirebaseSharedSwift: 79f27fff0addd15c3de19b87fba426f3cc2c964f
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
-  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
-  GoogleAdsOnDeviceConversion: d68c69dd9581a0f5da02617b6f377e5be483970f
+  flutter_secure_storage_macos: 7f45e30f838cf2659862a4e4e3ee1c347c2b3b54
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   GoogleAppMeasurement: 3bf40aff49a601af5da1c3345702fcb4991d35ee
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
-  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   patrol: 5df5d241d7f95f0df12a6906bbf45acb43a1e537
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
-  screenshot_callback: 85707df1b45a59407f7de87de2408c2f5312a473
-  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
-  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+  share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
+  url_launcher_macos: f87a979182d112f911de6820aefddaf56ee9fbfd
 
-PODFILE CHECKSUM: 53a6aebc29ccee84c41f92f409fc20cd4ca011f1
+PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
 
 COCOAPODS: 1.16.2

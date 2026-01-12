@@ -95,10 +95,18 @@ abstract class AnalyticsService {
   /// Track empty username validation
   Future<void> trackEmptyUsernameValidation() =>
       track('empty_username_validation', properties: {'field': 'username', 'error': 'empty'});
+      
+  /// Track invalid username validation (when not empty but fails other validation rules)
+  Future<void> trackInvalidUsernameValidation() =>
+      track('invalid_username_validation', properties: {'field': 'username', 'error': 'invalid_format'});
 
   /// Track empty password validation
   Future<void> trackEmptyPasswordValidation() =>
       track('empty_password_validation', properties: {'field': 'password', 'error': 'empty'});
+      
+  /// Track invalid password validation (when not empty but fails other validation rules)
+  Future<void> trackInvalidPasswordValidation() =>
+      track('invalid_password_validation', properties: {'field': 'password', 'error': 'invalid_format'});
 
   /// Track web-specific events
   Future<void> trackWebPageView(String pageName) =>

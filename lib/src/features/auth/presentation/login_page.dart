@@ -7,6 +7,7 @@ import 'package:mini_memverse/src/common/widgets/build_info.dart';
 import 'package:mini_memverse/src/common/widgets/password_field.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mini_memverse/src/features/auth/presentation/signup_page.dart';
+import 'package:mini_memverse/src/features/auth/utils/validation_utils.dart';
 import 'package:mini_memverse/src/utils/debug_mode_utils.dart';
 
 // Key constants for tests
@@ -31,15 +32,25 @@ class LoginPage extends HookConsumerWidget {
     Future<bool> validateFormWithAnalytics() async {
       var isValid = true;
 
-      // Check username
-      if (usernameController.text.isEmpty) {
+      // Check username with trimming
+      final username = usernameController.text.trim();
+      if (username.isEmpty) {
         await analyticsService.trackEmptyUsernameValidation();
+        isValid = false;
+      } else if (!username.isValidUsername) {
+        // Additional validation check using extension
+        await analyticsService.trackInvalidUsernameValidation();
         isValid = false;
       }
 
-      // Check password
-      if (passwordController.text.isEmpty) {
+      // Check password with trimming
+      final password = passwordController.text.trim();
+      if (password.isEmpty) {
         await analyticsService.trackEmptyPasswordValidation();
+        isValid = false;
+      } else if (!password.isValidPassword) {
+        // Additional validation check using extension
+        await analyticsService.trackInvalidPasswordValidation();
         isValid = false;
       }
 
@@ -125,8 +136,7 @@ class LoginPage extends HookConsumerWidget {
                             )
                           : const Icon(Icons.person),
                     ),
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Please enter your username' : null,
+                    validator: ValidationUtils.validateUsername,
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(passwordFocusNode);
@@ -143,14 +153,13 @@ class LoginPage extends HookConsumerWidget {
                     controller: passwordController,
                     focusNode: passwordFocusNode,
                     labelText: 'Password',
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Please enter your password' : null,
+                    validator: ValidationUtils.validatePassword,
                     textInputAction: TextInputAction.go,
                     onFieldSubmitted: (_) async {
                       if (await validateFormWithAnalytics()) {
                         ref
                             .read(authStateProvider.notifier)
-                            .login(usernameController.text, passwordController.text);
+                            .login(usernameController.text.trim(), passwordController.text.trim());
                       }
                     },
                     externalVisibilityState: isPasswordVisible,
@@ -203,7 +212,10 @@ class LoginPage extends HookConsumerWidget {
                               if (await validateFormWithAnalytics()) {
                                 await ref
                                     .read(authStateProvider.notifier)
-                                    .login(usernameController.text, passwordController.text);
+                                    .login(
+                                      usernameController.text.trim(),
+                                      passwordController.text.trim(),
+                                    );
                               }
                             },
                       child: authState.isLoading

@@ -87,6 +87,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.3.10
   flutter_svg: ^2.0.10+1  # For SVG support
+  screenshot_callback: ^3.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
