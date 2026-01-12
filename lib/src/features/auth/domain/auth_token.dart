@@ -1,9 +1,9 @@
 class AuthToken {
-  AuthToken({
+  const AuthToken({
     required this.accessToken,
-    required this.tokenType,
-    required this.scope,
-    required this.createdAt,
+    this.tokenType = 'Bearer',
+    this.scope = 'user',
+    this.createdAt = 0,
     this.userId,
   });
 

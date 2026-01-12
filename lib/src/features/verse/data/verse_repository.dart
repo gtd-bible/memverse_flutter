@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +8,25 @@ import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/constants/api_constants.dart';
 import 'package:mini_memverse/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mini_memverse/src/features/verse/domain/verse.dart';
-import 'package:mini_memverse/src/utils/test_utils.dart';
+// This should be moved to test directory, not imported in production code
+// TODO: Create proper abstraction to check for mock objects
+import 'package:mini_memverse/src/utils/test_utils.dart'
+    if (dart.library.io) 'package:mini_memverse/src/utils/test_utils_stub.dart';
+
+/// Exception thrown when authorization fails
+class AuthorizationException implements Exception {
+  /// Creates a new AuthorizationException
+  AuthorizationException(this.message, this.code);
+  
+  /// User-friendly error message
+  final String message;
+  
+  /// Error code for tracking
+  final String code;
+  
+  @override
+  String toString() => 'AuthorizationException: $message (code: $code)';
+}
 
 // More reliable test detection
 bool get isInTestMode {
@@ -132,13 +149,22 @@ class LiveVerseRepository implements VerseRepository {
     final stopwatch = Stopwatch()..start();
 
     try {
-      // Validate token is available when not running tests
-      // During tests, Dio is usually mocked so we don't need a real token
+      // Validate token is available when not in test or mock environment
       final token = _ref.read(accessTokenProvider);
       final bearerToken = _ref.read(bearerTokenProvider);
       final isTestMockDio = _dio.isTestMockDio;
+
+      // Check if token is missing and we're not in a test environment
       if (token.isEmpty && !isInTestMode && !isTestMockDio) {
-        throw Exception('No API token provided. Please login to get a valid token');
+        AppLogger.error(
+          'Authorization error: No valid API token available',
+          Exception('Missing token'),
+          StackTrace.current,
+        );
+        throw AuthorizationException(
+          'Authentication required. Please log in to access your verses.',
+          'TOKEN_MISSING',
+        );
       }
 
       // Use sort parameter to get most recent verses first (Heb 12:1 should appear first)

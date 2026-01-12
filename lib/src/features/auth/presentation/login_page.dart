@@ -29,6 +29,23 @@ class LoginPage extends HookConsumerWidget {
     final isPasswordVisible = useValueNotifier(false);
     final analyticsService = ref.read(analyticsServiceProvider);
 
+    // Auto-fill credentials in debug mode from environment variables
+    useEffect(() {
+      if (kDebugMode) {
+        // Only do this in debug mode for security
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final credentials = DebugModeUtils.getDebugCredentials();
+          if (credentials.username.isNotEmpty && credentials.password.isNotEmpty) {
+            // Auto-fill the form with debug credentials
+            usernameController.text = credentials.username;
+            passwordController.text = credentials.password;
+            debugPrint('✅ DEBUG: Auto-filled login form with environment credentials');
+          }
+        });
+      }
+      return null;
+    }, const []);
+
     Future<bool> validateFormWithAnalytics() async {
       var isValid = true;
 

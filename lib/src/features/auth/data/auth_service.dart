@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:mini_memverse/services/app_logger.dart';
-import 'package:mini_memverse/src/common/interceptors/curl_logging_interceptor.dart';
-import 'package:mini_memverse/src/constants/api_constants.dart';
+import 'package:mini_memverse/services/app_logger_facade.dart';
+import 'package:mini_memverse/src/constants/api_constants.dart' as api_constants;
 import 'package:mini_memverse/src/features/auth/data/auth_api.dart';
 import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
 
@@ -18,110 +17,106 @@ import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
 /// - OAuth endpoint (web): /oauth/token (Netlify proxy)
 /// - Other API endpoints (native): https://www.memverse.com/api/v1/* (versioned path)
 /// - Other API endpoints (web): /api/* (Netlify proxy)
-///
-/// This is why AuthApi uses different base URLs for web vs native platforms
 class AuthService {
-  /// Create a new AuthService
-  AuthService({FlutterSecureStorage? secureStorage, Dio? dio, AuthApi? authApi})
-    : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
-      _authApi =
-          authApi ??
-          // CRITICAL: OAuth endpoint routing depends on platform:
-          // - Web: Uses Netlify proxy at /oauth/token (relative URL)
-          // - Native: Uses direct HTTPS at https://www.memverse.com/oauth/token
-          AuthApi(
-            _createDioWithLogging(dio),
-            baseUrl: kIsWeb ? webOAuthPrefix : 'https://www.memverse.com',
-          );
+  /// Creates a new AuthService
+  ///
+  /// [secureStorage] is used to persist auth tokens
+  /// [dio] is used for network requests
+  AuthService({
+    required FlutterSecureStorage secureStorage,
+    required Dio dio,
+    required AppLoggerFacade appLogger,
+    AuthApi? authApi,
+  })  : _secureStorage = secureStorage,
+        _dio = dio,
+        _logger = appLogger {
+    // Configure Dio default headers
+    _dio.options.contentType = 'application/x-www-form-urlencoded';
+    _dio.options.headers = {'Content-Type': 'application/x-www-form-urlencoded'};
 
-  static Dio _createDioWithLogging(Dio? dio) {
-    final dioInstance = dio ?? Dio();
-
-    // Configure default settings to match successful curl request
-    dioInstance.options.validateStatus = (status) => status! < 500;
-
-    // CRITICAL: For OAuth token endpoint, we need to make the request exactly match the curl command
-    dioInstance.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // FIX: For OAuth endpoint, ensure we match the successful curl command exactly
-          if (options.path.contains('/oauth/token')) {
-            AppLogger.i('🔄 Applying special handling for OAuth token endpoint');
-
-            // 1. CLEAR ALL QUERY PARAMETERS - they should only be in the form body
-            if (options.queryParameters.isNotEmpty) {
-              AppLogger.w(
-                '⚠️ Clearing query parameters from OAuth request: ${options.queryParameters}',
-              );
-              options.queryParameters = {};
-            }
-
-            // 2. ENSURE CORRECT CONTENT TYPE
-            options.contentType = 'application/x-www-form-urlencoded';
-            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-
-            // 3. VERIFY WE HAVE FORM DATA
-            if (options.data == null || options.data is! Map) {
-              AppLogger.e('❌ OAuth request data is not correctly formatted! ${options.data}');
-            }
-          }
-
-          handler.next(options);
-        },
-      ),
-    );
-
-    // Add curl logging to see exactly what's sent
-    dioInstance.interceptors.add(CurlLoggingInterceptor());
-
-    // Add detailed request/response logging
-    dioInstance.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          AppLogger.i('🚀 OAuth Request: ${options.method} ${options.uri}');
-          AppLogger.i('📝 Headers: ${options.headers}');
-          if (kDebugMode) {
-            AppLogger.i('📦 Data: ${options.data}');
-          }
-          AppLogger.i('📋 Content-Type: ${options.contentType}');
-          handler.next(options);
-        },
-        onResponse: (response, handler) {
-          AppLogger.i('✅ OAuth Response: ${response.statusCode}');
-          AppLogger.i('📝 Response Headers: ${response.headers}');
-          if (kDebugMode) {
-            AppLogger.i('📦 Response Data: ${response.data}');
-          }
-          handler.next(response);
-        },
-        onError: (error, handler) {
-          AppLogger.error('❌ OAuth Error: ${error.message}');
-          AppLogger.error('🔍 Request: ${error.requestOptions.method} ${error.requestOptions.uri}');
-          AppLogger.error('📝 Request Headers: ${error.requestOptions.headers}');
-          if (kDebugMode) {
-            AppLogger.error('📦 Request Data: ${error.requestOptions.data}');
-          }
-          if (error.response != null) {
-            if (kDebugMode) {
-              AppLogger.error('📥 Error Response: ${error.response?.data}');
-            }
-            AppLogger.error('🔢 Status Code: ${error.response?.statusCode}');
-          }
-          handler.next(error);
-        },
-      ),
-    );
-
-    return dioInstance;
+    // Initialize API client with the dio instance
+    _authApi = authApi ?? AuthApi(dio, baseUrl: api_constants.apiBaseUrl);
   }
 
   final FlutterSecureStorage _secureStorage;
-  final AuthApi _authApi;
+  final Dio _dio;
+  final AppLoggerFacade _logger;
+  late final AuthApi _authApi;
 
+  /// Used to track dummy user mode for development/testing
+  bool isDummyUser = false;
+
+  /// Key used to store the auth token in secure storage
   static const _tokenKey = 'auth_token';
-  static bool isDummyUser = false;
 
-  /// Attempts to login with the provided credentials
+  /// Saves an auth token to secure storage
+  ///
+  /// Encrypts the token for secure storage
+  Future<void> saveToken(AuthToken token) async {
+    final tokenJson = json.encode(token.toJson());
+    await _secureStorage.write(key: _tokenKey, value: tokenJson);
+  }
+
+  /// Gets the saved auth token from secure storage
+  ///
+  /// Returns null if no token is found or if there's an error
+  Future<AuthToken?> getToken() async {
+    try {
+      final tokenJson = await _secureStorage.read(key: _tokenKey);
+      if (tokenJson == null || tokenJson.isEmpty) {
+        return null;
+      }
+
+      final tokenMap = json.decode(tokenJson) as Map<String, dynamic>;
+      return AuthToken.fromJson(tokenMap);
+    } catch (e) {
+      _logger.error('Error getting auth token from storage', e);
+      return null;
+    }
+  }
+
+  /// Clears any saved auth token from secure storage
+  ///
+  /// Used during logout
+  Future<void> clearToken() async {
+    await _secureStorage.delete(key: _tokenKey);
+  }
+
+  /// Checks if the auth token is valid and not expired
+  ///
+  /// Not currently implemented fully as API doesn't send expiry
+  Future<bool> isTokenValid(AuthToken token) async {
+    // Simple validation check
+    return token.accessToken.isNotEmpty;
+
+    // Implement proper token validation with expiry when API provides it
+    // if (token.expiresAt != null) {
+    //   final now = DateTime.now();
+    //   final expiryDate = DateTime.fromMillisecondsSinceEpoch(token.expiresAt! * 1000);
+    //   return now.isBefore(expiryDate);
+    // }
+  }
+
+  /// Adds auth headers to an HTTP request
+  ///
+  /// Used to authenticate API requests
+  Options addAuthHeaders(Options? options, AuthToken token) {
+    final headers = {
+      ...(options?.headers ?? {}),
+      'Authorization': '${token.tokenType} ${token.accessToken}',
+    };
+
+    return Options(
+      headers: headers,
+      contentType: options?.contentType,
+      responseType: options?.responseType,
+      // Add more options as needed
+    );
+  }
+
+  /// Logs a user in with the given credentials
+  ///
+  /// Throws an exception if authentication fails
   Future<AuthToken> login(
     String username,
     String password,
@@ -131,7 +126,7 @@ class AuthService {
     // Dummy user fast-path (bypasses all real auth)
     if (username.toLowerCase() == 'dummysigninuser@dummy.com') {
       isDummyUser = true;
-      AppLogger.i('Bypassing authentication: using dummysigninuser');
+      _logger.i('Bypassing authentication: using dummysigninuser');
       final fakeToken = AuthToken(
         accessToken: 'fake_token',
         tokenType: 'bearer',
@@ -142,10 +137,25 @@ class AuthService {
       await saveToken(fakeToken);
       return fakeToken;
     }
+    
+    // Validate credentials before even attempting API call
+    if (clientId.isEmpty || clientId == '\$MEMVERSE_CLIENT_ID') {
+      _logger.error('Invalid client ID value', 'Client ID is empty or unsubstituted variable');
+      throw Exception('Configuration error - Client ID not properly set');
+    }
+    
+    if (clientSecret.isEmpty || clientSecret == '\$MEMVERSE_CLIENT_API_KEY') {
+      _logger.error(
+        'Invalid client secret value',
+        'Client secret is empty or unsubstituted variable',
+      );
+      throw Exception('Configuration error - Client secret not properly set');
+    }
+    
     try {
-      AppLogger.i('Attempting login with provided credentials');
-      AppLogger.d(
-        'LOGIN - Attempting to log in with username: $username and clientId is non-empty: ${clientId.isNotEmpty} and apiKey is non-empty: ${clientSecret.isNotEmpty}',
+      _logger.i('Attempting login with provided credentials');
+      _logger.d(
+        'LOGIN - Attempting to log in with username: $username and clientId is non-empty: $clientId.isNotEmpty and apiKey is non-empty: $clientSecret.isNotEmpty',
       );
 
       final authToken = await _authApi.getBearerToken(
@@ -155,12 +165,28 @@ class AuthService {
         clientId,
         clientSecret,
       );
-      AppLogger.d('LOGIN - Received successful response with token $authToken');
-      AppLogger.d('LOGIN - Raw token type: ${authToken.tokenType}');
+      
+      // Validate token before proceeding
+      // Note: With non-nullable return type, we don't need this check
+      // But keeping it commented for future reference
+      // if (authToken == null) {
+      //   _logger.error('Received null token from API', 'API returned null instead of AuthToken');
+      //   throw Exception('Server returned an invalid response - null token');
+      // }
+      
+      if (authToken.accessToken.isEmpty) {
+        _logger.error('Received empty access token', 'API returned token with empty accessToken');
+        throw Exception('Server returned an invalid token');
+      }
+      
+      _logger.d(
+        'LOGIN - Received successful response with token ${authToken.accessToken.substring(0, 5)}...',
+      );
+      _logger.d('LOGIN - Token type: ${authToken.tokenType}');
       await saveToken(authToken);
       return authToken;
     } catch (e) {
-      AppLogger.error('Login failed with AuthApi/Retrofit exception', e);
+      _logger.error('Login failed with AuthApi/Retrofit exception', e);
 
       // Extract useful information from different error types
       String friendlyMessage;
@@ -199,8 +225,8 @@ class AuthService {
               technicalDetails = 'Redirect (302) to: ${e.response?.headers['location']}';
               break;
             default:
-              friendlyMessage = 'Server error (Status ${statusCode}) - Please try again later';
-              technicalDetails = 'HTTP ${statusCode}: $responseData';
+              friendlyMessage = 'Server error (Status $statusCode) - Please try again later';
+              technicalDetails = 'HTTP $statusCode: $responseData';
           }
         } else {
           // Other Dio error without response
@@ -218,8 +244,8 @@ class AuthService {
       }
 
       // Log both messages but only throw the user-friendly one
-      AppLogger.error('FRIENDLY ERROR: $friendlyMessage');
-      AppLogger.error('TECHNICAL DETAILS: $technicalDetails');
+      _logger.error('FRIENDLY ERROR: $friendlyMessage');
+      _logger.error('TECHNICAL DETAILS: $technicalDetails');
 
       // Rethrow with a user-friendly message
       throw Exception(friendlyMessage);
@@ -231,7 +257,7 @@ class AuthService {
     try {
       await _secureStorage.delete(key: _tokenKey);
     } catch (e) {
-      AppLogger.error('Error during logout', e);
+      _logger.error('Error during logout', e);
       rethrow;
     }
   }
@@ -242,66 +268,8 @@ class AuthService {
       final token = await _secureStorage.read(key: _tokenKey);
       return token != null;
     } catch (e) {
-      AppLogger.error('Error checking login status', e);
+      _logger.error('Error checking login status', e);
       return false;
     }
   }
-
-  /// Gets the stored auth token if available
-  Future<AuthToken?> getToken() async {
-    try {
-      final tokenJson = await _secureStorage.read(key: _tokenKey);
-      if (tokenJson == null) return null;
-
-      final tokenMap = jsonDecode(tokenJson) as Map<String, dynamic>;
-      return AuthToken.fromJson(tokenMap);
-    } catch (e) {
-      AppLogger.error('Error retrieving token', e);
-      return null;
-    }
-  }
-
-  /// Saves the auth token to secure storage
-  Future<void> saveToken(AuthToken token) async {
-    try {
-      final tokenJson = jsonEncode(token.toJson());
-      await _secureStorage.write(key: _tokenKey, value: tokenJson);
-    } catch (e) {
-      AppLogger.error('Error saving token', e);
-      rethrow;
-    }
-  }
-}
-
-class MockAuthService extends AuthService {
-  MockAuthService();
-
-  @override
-  Future<bool> isLoggedIn() async => true;
-
-  @override
-  Future<AuthToken> login(
-    String username,
-    String password,
-    String clientId,
-    String clientSecret,
-  ) async => AuthToken(
-    accessToken: 'mock',
-    tokenType: 'Bearer',
-    scope: 'user',
-    createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    userId: 0,
-  );
-
-  @override
-  Future<void> logout() async {}
-
-  @override
-  Future<AuthToken?> getToken() async => AuthToken(
-    accessToken: 'mock',
-    tokenType: 'Bearer',
-    scope: 'user',
-    createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    userId: 0,
-  );
 }

@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mini_memverse/services/app_logger_facade.dart';
 import 'package:mini_memverse/src/common/providers/bootstrap_provider.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';
@@ -43,7 +45,12 @@ final clientSecretProvider = Provider<String>((ref) {
 
 /// Provider for the AuthService
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService();
+  final appLogger = ref.watch(appLoggerFacadeProvider);
+  return AuthService(
+    secureStorage: const FlutterSecureStorage(),
+    dio: Dio(),
+    appLogger: appLogger,
+  );
 });
 
 /// Authentication state provider
@@ -79,15 +86,23 @@ class AuthState {
   final AuthToken? token;
   final String? error;
 
-  AuthState copyWith({bool? isAuthenticated, bool? isLoading, AuthToken? token, String? error}) {
+  AuthState copyWith({
+    bool? isAuthenticated,
+    bool? isLoading,
+    AuthToken? token,
+    Object? error = _unspecified,
+  }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isLoading: isLoading ?? this.isLoading,
       token: token ?? this.token,
-      error: error,
+      error: error == _unspecified ? this.error : (error as String?),
     );
   }
 }
+
+// Used to detect if a parameter is unspecified
+const _unspecified = Object();
 
 /// Authentication state notifier
 class AuthNotifier extends StateNotifier<AuthState> {

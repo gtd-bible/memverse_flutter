@@ -95,41 +95,41 @@ Future<void> main() async {
   // Initialize Flutter binding
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Check for required environment variables from app_constants.dart
+  // Check required environment variables
   final memverseClientId = app_constants.memverseClientId;
   final clientSecret = app_constants.memverseClientSecret;
 
-  if (kDebugMode) {
-    debugPrint('🔍 Checking environment variables:');
-    debugPrint(
-      '   MEMVERSE_CLIENT_ID: ${memverseClientId.isEmpty ? "❌ MISSING" : "✅ FOUND (${memverseClientId.length} chars)"}',
-    );
-    debugPrint(
-      '   MEMVERSE_CLIENT_API_KEY: ${clientSecret.isEmpty ? "❌ MISSING" : "✅ FOUND (${clientSecret.length} chars)"}',
-    );
-  }
+  // Simple environment check (until we can generate the EnvChecker class)
+  final envCheckPassed =
+      memverseClientId.isNotEmpty &&
+      clientSecret.isNotEmpty &&
+      memverseClientId != "\$MEMVERSE_CLIENT_ID" &&
+      clientSecret != "\$MEMVERSE_CLIENT_API_KEY";
 
-  // Show error if any required variables are missing
-  if (memverseClientId.isEmpty) {
-    runApp(
-      const ConfigurationErrorWidget(
-        error:
-            'Missing required MEMVERSE_CLIENT_ID configuration for authentication.\n\n'
-            'This value is needed for OAuth authentication.\n\n'
-            'Please run with: --dart-define=MEMVERSE_CLIENT_ID=your_client_id',
-      ),
-    );
-    return;
-  }
+  // Show detailed error message if environment variables are missing or invalid
+  if (!envCheckPassed) {
+    debugPrint('❌ Environment variable check failed! Check logs for details.');
 
-  if (clientSecret.isEmpty) {
-    runApp(
-      const ConfigurationErrorWidget(
-        error:
-            'Missing required MEMVERSE_CLIENT_API_KEY environment variable.\n\n'
-            'This value is needed for API authentication.',
-      ),
-    );
+    String errorDetails = 'One or more required environment variables are missing or invalid.\n\n';
+
+    // Build specific error messages based on which variables failed
+    if (memverseClientId.isEmpty || memverseClientId == '\$MEMVERSE_CLIENT_ID') {
+      errorDetails +=
+          '• MEMVERSE_CLIENT_ID: ${memverseClientId.isEmpty ? "Missing" : "Unsubstituted"}\n';
+    }
+
+    if (clientSecret.isEmpty || clientSecret == '\$MEMVERSE_CLIENT_API_KEY') {
+      errorDetails +=
+          '• MEMVERSE_CLIENT_API_KEY: ${clientSecret.isEmpty ? "Missing" : "Unsubstituted"}\n';
+    }
+
+    errorDetails +=
+        '\nPossible causes:\n'
+        '1. Environment variables not defined in your shell\n'
+        '2. Forgot to use --dart-define flags\n'
+        '3. Using literal \$ variables instead of actual values\n';
+
+    runApp(ConfigurationErrorWidget(error: errorDetails));
     return;
   }
 

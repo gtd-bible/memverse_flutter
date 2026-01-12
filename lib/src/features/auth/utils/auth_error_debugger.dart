@@ -192,9 +192,9 @@ class AuthErrorDebugger {
     for (final statusCode in httpErrors) {
       final userMessage = await simulateHttpError(
         statusCode: statusCode,
-        responseData: {'error': 'Test error for HTTP $statusCode'},
-        context: 'AuthTest_HTTP_$statusCode',
-        additionalData: {'test_run': true, 'error_type': 'http_$statusCode'},
+        responseData: {'error': 'Simulated error for HTTP $statusCode'},
+        context: 'SimulatedHTTP_$statusCode',
+        additionalData: {'simulation': true, 'error_type': 'http_$statusCode'},
       );
       results['HTTP $statusCode'] = userMessage;
     }
@@ -209,8 +209,8 @@ class AuthErrorDebugger {
     for (final errorType in networkErrors) {
       final userMessage = await simulateNetworkError(
         type: errorType,
-        context: 'AuthTest_Network_${errorType.name}',
-        additionalData: {'test_run': true, 'error_type': 'network_${errorType.name}'},
+        context: 'SimulatedNetwork_${errorType.name}',
+        additionalData: {'simulation': true, 'error_type': 'network_${errorType.name}'},
       );
       results['Network ${errorType.name}'] = userMessage;
     }
@@ -218,16 +218,16 @@ class AuthErrorDebugger {
     // Test socket exception
     final socketMessage = await simulateSocketException(
       message: 'Failed to connect to www.memverse.com',
-      context: 'AuthTest_Socket',
-      additionalData: {'test_run': true, 'error_type': 'socket'},
+      context: 'SimulatedSocket',
+      additionalData: {'simulation': true, 'error_type': 'socket'},
     );
     results['Socket Exception'] = socketMessage;
 
     // Test format exception
     final formatMessage = await simulateFormatException(
       message: 'Unexpected character at position 42',
-      context: 'AuthTest_Format',
-      additionalData: {'test_run': true, 'error_type': 'format'},
+      context: 'SimulatedFormat',
+      additionalData: {'simulation': true, 'error_type': 'format'},
     );
     results['Format Exception'] = formatMessage;
 

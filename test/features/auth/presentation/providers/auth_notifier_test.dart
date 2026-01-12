@@ -165,7 +165,7 @@ void main() {
       // Arrange
       when(
         () => authService.login(testUsername, testPassword, testClientId, testClientSecret),
-      ).thenAnswer((_) async => null);
+      ).thenAnswer((_) async => const AuthToken(accessToken: ''));
 
       // Act
       await authNotifier.login(testUsername, testPassword);
@@ -349,7 +349,7 @@ void main() {
       verify(() => analyticsFacade.logScreenView('login', 'LoginScreen')).called(1);
 
       // Verify logging
-      verify(() => appLogger.i(any())).called(atLeast: 1);
+      verify(() => appLogger.i(any())).called(2);
     });
 
     test('logout error calls error handler and maintains state', () async {

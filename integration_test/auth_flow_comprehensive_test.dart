@@ -231,7 +231,7 @@ void main() {
       
       // Skip this test on real device since we can't modify the URL easily
       log('⏭️ This test requires URL mocking which is only available in the auth_error_scenarios_test');
-      log('⏭️ For manual testing: confirm that requests to typo'd URLs show appropriate error messages');
+      log('⏭️ For manual testing: confirm that requests to URLs with typos show appropriate error messages');
       
       log('🎭 TEST SKIPPED: Login with malformed URL (requires mocking)');
     });

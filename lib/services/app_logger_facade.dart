@@ -13,8 +13,8 @@ class AppLoggerFacade {
     required this.logger,
     required this.analyticsFacade,
     required this.talker,
-    required this.crashlytics,
-  });
+    FirebaseCrashlytics? crashlytics,
+  }) : crashlytics = crashlytics ?? FirebaseCrashlytics.instance;
 
   /// The logger instance
   final Logger logger;

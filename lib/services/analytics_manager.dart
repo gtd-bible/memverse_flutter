@@ -23,6 +23,8 @@ class AnalyticsManager {
   FirebaseCrashlytics get crashlytics => _crashlytics;
 
   /// Access to tester type environment variable
+  /// Should import this from app_constants.dart instead for consistency
+  /// TODO: Refactor to use app_constants.dart to maintain a single source of truth
   static String get testerType => const String.fromEnvironment('TESTER_TYPE', defaultValue: '');
 
   /// Initializes the AnalyticsManager

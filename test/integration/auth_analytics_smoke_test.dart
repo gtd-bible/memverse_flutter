@@ -83,12 +83,14 @@ void main() {
       // Setup Riverpod overrides
       container = ProviderContainer(
         overrides: [
-          authServiceProvider.overrideWithValue(mockAuthService),
           bootstrapProvider.overrideWithValue(const TestBootstrapValues()),
           talkerProvider.overrideWithValue(mockTalker),
           analyticsFacadeProvider.overrideWithValue(mockAnalyticsFacade),
         ],
       );
+
+      // Override auth service with our mock
+      container.overrideAuthService(logger: MockAppLoggerFacade(), mockService: mockAuthService);
 
       // Initialize the AuthNotifier manually with the mocked dependencies
       authNotifier = AuthNotifier(

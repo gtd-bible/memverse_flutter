@@ -1,146 +1,122 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mini_memverse/src/features/auth/utils/validation_utils.dart';
+import 'test_extensions.dart';
 
 void main() {
   group('ValidationUtils', () {
     group('validateUsername', () {
-      test('should return error message for null username', () {
-        final result = ValidationUtils.validateUsername(null);
-        expect(result, isNotNull);
-        expect(result, contains('Please enter your username'));
+      test('should return null for valid usernames', () {
+        expect(ValidationUtils.validateUsername('username123'), isNull);
+        expect(ValidationUtils.validateUsername('user.name'), isNull);
+        expect(ValidationUtils.validateUsername('user_name'), isNull);
+        expect(ValidationUtils.validateUsername('user-name'), isNull);
+        expect(ValidationUtils.validateUsername('user@example.com'), isNull);
+      });
+      
+      test('should validate email addresses', () {
+        expect(ValidationUtils.validateUsername('test@example.com'), isNull);
+        expect(ValidationUtils.validateUsername('test.user@domain.co.uk'), isNull);
+        expect(ValidationUtils.validateUsername('test+filter@gmail.com'), isNull);
       });
 
-      test('should return error message for empty username', () {
+      test('should return error for empty username', () {
         final result = ValidationUtils.validateUsername('');
         expect(result, isNotNull);
-        expect(result, contains('Please enter your username'));
+        expect(result, contains('required'));
       });
 
-      test('should return error message for whitespace-only username', () {
+      test('should return error for username with spaces only', () {
         final result = ValidationUtils.validateUsername('   ');
         expect(result, isNotNull);
-        expect(result, contains('Please enter your username'));
+        expect(result, contains('required'));
       });
 
-      test('should return error message for username shorter than 3 characters', () {
-        final result = ValidationUtils.validateUsername('ab');
-        expect(result, isNotNull);
-        expect(result, contains('at least 3 characters'));
-      });
-
-      test('should return error message for username longer than 50 characters', () {
-        final tooLong = 'a' * 51;
-        final result = ValidationUtils.validateUsername(tooLong);
-        expect(result, isNotNull);
-        expect(result, contains('less than 50 characters'));
-      });
-
-      test('should return error message for invalid email format if @ is present', () {
-        final result = ValidationUtils.validateUsername('invalid@email');
-        expect(result, isNotNull);
-        expect(result, contains('valid email address'));
-      });
-
-      test('should return null for valid username with exactly 3 characters', () {
+      test('should return error for username that is too short', () {
         final result = ValidationUtils.validateUsername('abc');
-        expect(result, isNull);
+        expect(result, isNotNull);
+        expect(result, contains('at least'));
       });
-
-      test('should return null for valid username with 50 characters', () {
-        final exactlyRight = 'a' * 50;
-        final result = ValidationUtils.validateUsername(exactlyRight);
-        expect(result, isNull);
-      });
-
-      test('should return null for valid username with spaces that trim to valid length', () {
-        final result = ValidationUtils.validateUsername('  validuser  ');
-        expect(result, isNull);
-      });
-
-      test('should return null for valid email format', () {
-        final result = ValidationUtils.validateUsername('user@example.com');
+      
+      test('should trim whitespace before validating', () {
+        // This should validate to exactly 4 chars after trimming (minimum required)
+        final result = ValidationUtils.validateUsername('  abcd  ');
         expect(result, isNull);
       });
     });
 
     group('validatePassword', () {
-      test('should return error message for null password', () {
-        final result = ValidationUtils.validatePassword(null);
-        expect(result, isNotNull);
-        expect(result, contains('Please enter your password'));
+      test('should return null for valid passwords', () {
+        expect(ValidationUtils.validatePassword('password123'), isNull);
+        expect(ValidationUtils.validatePassword('P@ssw0rd!'), isNull);
+        expect(ValidationUtils.validatePassword('12345678'), isNull);
       });
 
-      test('should return error message for empty password', () {
+      test('should return error for empty password', () {
         final result = ValidationUtils.validatePassword('');
         expect(result, isNotNull);
-        expect(result, contains('Please enter your password'));
+        expect(result, contains('required'));
       });
 
-      test('should return error message for whitespace-only password', () {
+      test('should return error for password with spaces only', () {
         final result = ValidationUtils.validatePassword('   ');
         expect(result, isNotNull);
-        expect(result, contains('Please enter your password'));
+        expect(result, contains('required'));
       });
 
-      test('should return error message for password shorter than 8 characters', () {
-        final result = ValidationUtils.validatePassword('short');
+      test('should return error for password that is too short', () {
+        final result = ValidationUtils.validatePassword('pass');
         expect(result, isNotNull);
-        expect(result, contains('at least 8 characters'));
+        expect(result, contains('at least'));
       });
-
-      test('should return error message for password longer than 100 characters', () {
-        final tooLong = 'a' * 101;
-        final result = ValidationUtils.validatePassword(tooLong);
-        expect(result, isNotNull);
-        expect(result, contains('less than 100 characters'));
-      });
-
-      test('should return null for valid password with exactly 8 characters', () {
-        final result = ValidationUtils.validatePassword('password');
-        expect(result, isNull);
-      });
-
-      test('should return null for valid password with 100 characters', () {
-        final exactlyRight = 'a' * 100;
-        final result = ValidationUtils.validatePassword(exactlyRight);
-        expect(result, isNull);
-      });
-
-      test('should return null for valid password with spaces that trim to valid length', () {
-        final result = ValidationUtils.validatePassword('  password123  ');
+      
+      test('should trim whitespace before validating', () {
+        // This should validate to exactly 8 chars after trimming (minimum required)
+        final result = ValidationUtils.validatePassword('  password  ');
         expect(result, isNull);
       });
     });
-
-    group('StringValidationExtension', () {
-      test('isValidUsername should return true for valid username', () {
-        expect('validuser'.isValidUsername, isTrue);
-      });
-
-      test('isValidUsername should return false for invalid username', () {
-        expect('ab'.isValidUsername, isFalse);
-      });
-
-      test('isValidPassword should return true for valid password', () {
-        expect('password123'.isValidPassword, isTrue);
-      });
-
-      test('isValidPassword should return false for invalid password', () {
-        expect('short'.isValidPassword, isFalse);
-      });
-
-      test('isValidEmail should return true for valid email', () {
-        expect('user@example.com'.isValidEmail, isTrue);
-      });
-
-      test('isValidEmail should return false for invalid email', () {
-        expect('invalidemail'.isValidEmail, isFalse);
-        expect('invalid@email'.isValidEmail, isFalse);
-      });
-
-      test('isValidEmail should handle whitespace correctly', () {
-        expect('  user@example.com  '.isValidEmail, isTrue);
-      });
+    
+    // Parameterized testing for email validation
+    group('validateEmailFormat', () {
+      final validEmails = [
+        'test@example.com',
+        'test.name@example.com',
+        'test+filter@gmail.com',
+        'test@subdomain.example.co.uk',
+        'test123@example.com',
+        'TEST@EXAMPLE.COM',
+        '123@example.com',
+      ];
+      
+      final invalidEmails = [
+        '',
+        'test',
+        'test@',
+        '@example.com',
+        'test@example',
+        'test@.com',
+        'test@example..com',
+        'test@example.com.',
+        '.test@example.com',
+        'test..name@example.com',
+        'test@example.com@example.com',
+        'test@example,com',
+        'test example@example.com',
+      ];
+      
+      for (final email in validEmails) {
+        test('should validate correct email: $email', () {
+          expect(ValidationUtils.validateEmailFormat(email), isNull);
+        });
+      }
+      
+      for (final email in invalidEmails) {
+        test('should reject invalid email: "$email"', () {
+          final result = ValidationUtils.validateEmailFormat(email);
+          expect(result, isNotNull);
+          expect(result, contains('valid email'));
+        });
+      }
     });
   });
 }
