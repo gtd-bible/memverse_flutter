@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mini_memverse/services/app_logger.dart';
+import 'package:mini_memverse/services/app_logger_facade.dart';
 import 'package:mini_memverse/src/common/providers/bootstrap_provider.dart';
 import 'package:mini_memverse/src/common/providers/talker_provider.dart';
 import 'package:mini_memverse/src/common/services/analytics_service.dart';
 import 'package:mini_memverse/src/features/auth/data/auth_service.dart';
 import 'package:mini_memverse/src/features/auth/domain/auth_token.dart';
+import 'package:mini_memverse/src/features/auth/providers/auth_error_handler_provider.dart';
+import 'package:mini_memverse/src/features/auth/utils/auth_error_handler.dart';
 import 'package:mini_memverse/src/monitoring/analytics_facade.dart';
 import 'package:talker/talker.dart';
 
@@ -52,14 +55,18 @@ final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final analyticsService = ref.watch(analyticsServiceProvider);
   final analyticsFacade = ref.watch(analyticsFacadeProvider);
   final talker = ref.watch(talkerProvider);
+  final appLogger = ref.watch(appLoggerFacadeProvider);
+  final errorHandler = ref.watch(authErrorHandlerProvider);
 
   return AuthNotifier(
-    authService,
-    clientId,
-    clientSecret,
-    analyticsService,
-    analyticsFacade,
-    talker,
+    authService: authService,
+    clientId: clientId,
+    clientSecret: clientSecret,
+    analyticsService: analyticsService,
+    analyticsFacade: analyticsFacade,
+    talker: talker,
+    appLogger: appLogger,
+    errorHandler: errorHandler,
   );
 });
 
@@ -85,14 +92,24 @@ class AuthState {
 
 /// Authentication state notifier
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(
-    this._authService,
-    this._clientId,
-    this._clientSecret,
-    this._analyticsService,
-    this._analyticsFacade,
-    this._talker,
-  ) : super(const AuthState()) {
+  AuthNotifier({
+    required AuthService authService,
+    required String clientId,
+    required String clientSecret,
+    required AnalyticsService analyticsService,
+    required AnalyticsFacade analyticsFacade,
+    required Talker talker,
+    required AppLoggerFacade appLogger,
+    required AuthErrorHandler errorHandler,
+  }) : _authService = authService,
+       _clientId = clientId,
+       _clientSecret = clientSecret,
+       _analyticsService = analyticsService,
+       _analyticsFacade = analyticsFacade,
+       _talker = talker,
+       _appLogger = appLogger,
+       _errorHandler = errorHandler,
+       super(const AuthState()) {
     _init();
   }
 
@@ -102,6 +119,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AnalyticsService _analyticsService;
   final AnalyticsFacade _analyticsFacade;
   final Talker _talker;
+  final AppLoggerFacade _appLogger;
+  final AuthErrorHandler _errorHandler;
 
   Future<void> _init() async {
     state = state.copyWith(isLoading: true);
@@ -120,104 +139,136 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> login(String username, String password) async {
     try {
-      state = state.copyWith(isLoading: true);
+      state = state.copyWith(isLoading: true, error: null);
 
-      // Log authentication attempt (not exposing sensitive details)
-      AppLogger.i(
+      // Log authentication attempt with sensitive details protected
+      _appLogger.i(
         '***Attempting login with client ID: ${_clientId.isNotEmpty ? "PRESENT" : "MISSING"}',
       );
-      AppLogger.i(
+      _appLogger.i(
         '***Attempting login with client secret: ${_clientSecret.isNotEmpty ? "PRESENT" : "MISSING"}',
       );
 
       // Send analytics event for login attempt (before network call)
       // This helps track how many users attempt to log in
-      _analyticsFacade.logEvent(
+      await _analyticsFacade.logEvent(
         'login_attempt',
-        parameters: {'has_username': username.isNotEmpty, 'username_length': username.length},
+        parameters: {
+          'has_username': username.isNotEmpty,
+          'username_length': username.length,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
       );
 
+      // Attempt login with credentials
       final token = await _authService.login(username, password, _clientId, _clientSecret);
 
-      // Log token information (non-sensitive parts)
+      // Handle successful login vs empty token response
       if (token?.accessToken?.isNotEmpty == true) {
-        AppLogger.i('Successfully authenticated');
+        _appLogger.i('Successfully authenticated');
 
         // Track successful login with both analytics systems
         await _analyticsService.trackLogin(username);
         await _analyticsFacade.trackLogin();
 
+        // Set user ID in analytics for future events
+        if (token.userId != null) {
+          await _analyticsFacade.setUserId(token.userId.toString());
+        }
+
         // Log successful authentication with detailed user data
-        _analyticsFacade.logEvent(
+        await _analyticsFacade.logEvent(
           'login_success',
           parameters: {
-            'user_id': token.userId.toString(),
+            'user_id': token.userId?.toString() ?? 'unknown',
             'token_type': token.tokenType,
             'authenticated': true,
+            'timestamp': DateTime.now().toIso8601String(),
           },
         );
-      } else {
-        AppLogger.i('Authentication failed by access token not being present');
 
-        // Log empty token error
-        _analyticsFacade.logEvent(
-          'login_empty_token',
-          parameters: {'has_username': username.isNotEmpty, 'authenticated': false},
+        // Track screen view for the next screen
+        await _analyticsFacade.logScreenView('dashboard', 'DashboardScreen');
+      } else {
+        // Handle empty token response (API returned 200 but no valid token)
+        _appLogger.warning(
+          'Authentication failed: Empty or invalid token received',
+          null,
+          StackTrace.current,
         );
 
-        // Log this error with Talker for detailed error reporting
-        _talker.error('Login failed - Empty access token received');
+        // Log empty token error with context
+        await _analyticsFacade.logEvent(
+          'login_empty_token',
+          parameters: {
+            'has_username': username.isNotEmpty,
+            'authenticated': false,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+
+        // Record as an error for better tracking
+        await _errorHandler.processError(
+          Exception('Empty access token received'),
+          StackTrace.current,
+          context: 'Login',
+          additionalData: {
+            'username_provided': username.isNotEmpty,
+            'username_length': username.length,
+            'empty_token': true,
+          },
+        );
+
+        // Update UI with user-friendly message
+        state = state.copyWith(
+          isAuthenticated: false,
+          isLoading: false,
+          error: 'Login failed. Please try again later.',
+        );
+        return;
       }
 
+      // Update state with authentication result
       state = state.copyWith(
         isAuthenticated: token != null && token.accessToken.isNotEmpty,
         isLoading: false,
         token: token,
       );
     } catch (e, stackTrace) {
-      AppLogger.error('Login failed', e);
+      _appLogger.error('Login failed', e, stackTrace);
 
-      // Track login failure with both analytics systems
+      // Track login failure with legacy analytics
       await _analyticsService.trackLoginFailure(username, e.toString());
 
-      // Use Talker for comprehensive error reporting with stack traces
-      _talker.handle(e, stackTrace, 'Login failed');
-
-      // Log detailed error information to crashlytics
-      _analyticsFacade.recordError(
+      // Use our comprehensive error handler for consistent processing
+      final userFriendlyError = await _errorHandler.processError(
         e,
         stackTrace,
-        reason: 'Login failure',
-        fatal: false,
+        context: 'Login',
         additionalData: {
           'username_provided': username.isNotEmpty,
           'username_length': username.length,
           'client_id_provided': _clientId.isNotEmpty,
           'client_secret_provided': _clientSecret.isNotEmpty,
+          'auth_method': 'password',
         },
       );
 
-      // Send error analytics
-      _analyticsFacade.trackError('auth_error', 'Login failed: ${e.toString()}');
-
-      // Extract friendly error message if available
-      String userFriendlyError;
-
-      if (e.toString().contains('Exception: ')) {
-        // Extract the message from our improved error handling in auth_service.dart
-        userFriendlyError = e.toString().replaceFirst('Exception: ', '');
-      } else {
-        // Fallback for unexpected errors
-        userFriendlyError = 'Login failed. Please check your credentials and try again.';
-      }
-
+      // Update state with error message
       state = state.copyWith(isLoading: false, error: userFriendlyError);
     }
   }
 
   Future<void> logout() async {
     try {
-      state = state.copyWith(isLoading: true);
+      state = state.copyWith(isLoading: true, error: null);
+
+      // Log logout attempt
+      _appLogger.i(
+        'Attempting to log out user ID: ${state.token?.userId?.toString() ?? "unknown"}',
+      );
+
+      // Perform logout operation
       await _authService.logout();
 
       // Track logout with both analytics systems
@@ -225,26 +276,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _analyticsFacade.trackLogout();
 
       // Log detailed logout information
-      _analyticsFacade.logEvent(
+      await _analyticsFacade.logEvent(
         'user_logout',
         parameters: {
           'user_id': state.token?.userId?.toString() ?? 'unknown',
           'session_active': state.isAuthenticated,
+          'timestamp': DateTime.now().toIso8601String(),
         },
       );
 
+      // Clear user ID in analytics
+      await _analyticsFacade.setUserId(null);
+
+      // Track screen view for login screen
+      await _analyticsFacade.logScreenView('login', 'LoginScreen');
+
+      // Log successful logout
+      _appLogger.i('Successfully logged out');
+
+      // Reset auth state completely
       state = const AuthState();
     } catch (e, stackTrace) {
-      // Log the error with Talker
-      _talker.handle(e, stackTrace, 'Logout failed');
+      _appLogger.error('Logout failed', e, stackTrace);
 
-      // Record the error in Crashlytics
-      _analyticsFacade.recordError(e, stackTrace, reason: 'Logout failure', fatal: false);
+      // Use our comprehensive error handler
+      final userFriendlyError = await _errorHandler.processError(
+        e,
+        stackTrace,
+        context: 'Logout',
+        additionalData: {
+          'user_id': state.token?.userId?.toString() ?? 'unknown',
+          'was_authenticated': state.isAuthenticated,
+        },
+      );
 
-      // Send error analytics
-      _analyticsFacade.trackError('auth_error', 'Logout failed: ${e.toString()}');
-
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // Update state with error, but maintain authentication status
+      state = state.copyWith(isLoading: false, error: userFriendlyError);
     }
   }
 }
