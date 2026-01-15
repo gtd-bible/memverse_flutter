@@ -95,11 +95,49 @@ if [[ "$CONFIRM" =~ ^([nN][oO]?|[nN])$ ]]; then
 fi
 
 EXPORT_PLIST=ios/ExportOptions.plist
-flutter build ipa \
-  --export-options-plist=$EXPORT_PLIST \
+# Build the app for archiving
+flutter build ios --release \
   --dart-define=MEMVERSE_CLIENT_ID="$MEMVERSE_CLIENT_ID" \
   --dart-define=MEMVERSE_CLIENT_API_KEY="$MEMVERSE_CLIENT_API_KEY" \
   --dart-define=TESTER_TYPE="$TESTER_TYPE"
+
+# Create the archive directly with xcodebuild (fully automated)
+echo "📱 Creating archive..."
+
+ARCHIVE_PATH="$HOME/Library/Developer/Xcode/Archives/$(date +%Y-%m-%d)"
+mkdir -p "$ARCHIVE_PATH"
+ARCHIVE_FILENAME="MiniMemverse_$(date +%Y-%m-%d_%H%M%S).xcarchive"
+FULL_ARCHIVE_PATH="$ARCHIVE_PATH/$ARCHIVE_FILENAME"
+
+# Build and archive using xcodebuild
+# This preserves the dart defines from the previous flutter build
+xcodebuild -workspace ios/Runner.xcworkspace \
+  -scheme Runner \
+  -configuration Release \
+  -archivePath "$FULL_ARCHIVE_PATH" \
+  archive
+
+# Run script to ensure SwiftSupport folder exists
+echo "🔧 Ensuring SwiftSupport folder exists..."
+./ios/add_swift_support.sh "$LATEST_ARCHIVE"
+
+# Build IPA from the archive using xcodebuild (more reliable than flutter build ipa)
+echo "📦 Creating IPA from archive..."
+
+# Use the archive we just created
+LATEST_ARCHIVE="$FULL_ARCHIVE_PATH"
+echo "📦 Using archive: $LATEST_ARCHIVE"
+echo "🛠️ Exporting IPA with options from $EXPORT_PLIST"
+
+# Export the IPA
+xcodebuild -exportArchive \
+  -archivePath "$LATEST_ARCHIVE" \
+  -exportOptionsPlist "$EXPORT_PLIST" \
+  -exportPath "build/ios/ipa" \
+  -allowProvisioningUpdates
+
+# Copy the IPA to the expected location
+mv build/ios/ipa/*.ipa build/ios/ipa/MiniMemverse.ipa
 
 echo "📱 IPA built successfully. Now adding Swift support..."
 
