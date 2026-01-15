@@ -95,49 +95,49 @@ if [[ "$CONFIRM" =~ ^([nN][oO]?|[nN])$ ]]; then
 fi
 
 EXPORT_PLIST=ios/ExportOptions.plist
-# Build the app for archiving
-flutter build ios --release \
+# Use flutter build ipa with automatic signing
+echo "📱 Building IPA with flutter (automatic signing)..."
+
+flutter build ipa \
+  --export-options-plist=$EXPORT_PLIST \
   --dart-define=MEMVERSE_CLIENT_ID="$MEMVERSE_CLIENT_ID" \
   --dart-define=MEMVERSE_CLIENT_API_KEY="$MEMVERSE_CLIENT_API_KEY" \
-  --dart-define=TESTER_TYPE="$TESTER_TYPE"
+  --dart-define=TESTER_TYPE="$TESTER_TYPE" \
+  --obfuscate --split-debug-info=symbols
 
-# Create the archive directly with xcodebuild (fully automated)
-echo "📱 Creating archive..."
+ARCHIVE_PATH="$(find $HOME/Library/Developer/Xcode/Archives -name "*.xcarchive" -type d -mtime -1 | sort -nr | head -1)"
 
-ARCHIVE_PATH="$HOME/Library/Developer/Xcode/Archives/$(date +%Y-%m-%d)"
-mkdir -p "$ARCHIVE_PATH"
-ARCHIVE_FILENAME="MiniMemverse_$(date +%Y-%m-%d_%H%M%S).xcarchive"
-FULL_ARCHIVE_PATH="$ARCHIVE_PATH/$ARCHIVE_FILENAME"
-
-# Build and archive using xcodebuild
-# This preserves the dart defines from the previous flutter build
-xcodebuild -workspace ios/Runner.xcworkspace \
-  -scheme Runner \
-  -configuration Release \
-  -archivePath "$FULL_ARCHIVE_PATH" \
-  archive
+if [ -z "$ARCHIVE_PATH" ]; then
+  echo "❌ No recent archives found. Flutter might not have created a standard Xcode archive."
+  # Try to find the archive Flutter created
+  ARCHIVE_PATH=$(find /tmp -name "*.xcarchive" -type d -mtime -1 | sort -nr | head -1)
+  
+  if [ -z "$ARCHIVE_PATH" ]; then
+    echo "❌ Could not locate archive. Will try to add SwiftSupport to the IPA directly."
+  else
+    echo "📦 Found archive at: $ARCHIVE_PATH"
+  fi
+else
+  echo "📦 Found archive at: $ARCHIVE_PATH"
+fi
 
 # Run script to ensure SwiftSupport folder exists
 echo "🔧 Ensuring SwiftSupport folder exists..."
-./ios/add_swift_support.sh "$LATEST_ARCHIVE"
+./ios/add_swift_support.sh "$ARCHIVE_PATH"
 
 # Build IPA from the archive using xcodebuild (more reliable than flutter build ipa)
 echo "📦 Creating IPA from archive..."
 
-# Use the archive we just created
-LATEST_ARCHIVE="$FULL_ARCHIVE_PATH"
-echo "📦 Using archive: $LATEST_ARCHIVE"
+# If we found an archive, use it for SwiftSupport
+if [ -n "$ARCHIVE_PATH" ]; then
+  echo "📦 Using archive: $ARCHIVE_PATH"
+else
+  echo "⚠️ No archive found, will attempt direct IPA fix"
+fi
 echo "🛠️ Exporting IPA with options from $EXPORT_PLIST"
 
 # Export the IPA
-xcodebuild -exportArchive \
-  -archivePath "$LATEST_ARCHIVE" \
-  -exportOptionsPlist "$EXPORT_PLIST" \
-  -exportPath "build/ios/ipa" \
-  -allowProvisioningUpdates
-
-# Copy the IPA to the expected location
-mv build/ios/ipa/*.ipa build/ios/ipa/MiniMemverse.ipa
+# IPA should already be created by flutter build ipa, let's continue
 
 echo "📱 IPA built successfully. Now adding Swift support..."
 
