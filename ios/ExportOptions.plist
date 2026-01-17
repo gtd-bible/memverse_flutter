@@ -20,5 +20,9 @@
 	<true/>
 	<key>thinning</key>
 	<string>&lt;none&gt;</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>compileBitcode</key>
+	<false/>
 </dict>
 </plist>
