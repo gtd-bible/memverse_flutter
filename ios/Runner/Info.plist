@@ -47,6 +47,17 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<!-- 
+		Encryption Export Compliance
+		Setting ITSAppUsesNonExemptEncryption to false indicates that:
+		1. The app only uses standard encryption (HTTPS, standard auth)
+		2. The app qualifies for exemption (using only Apple-provided or public domain encryption)
+		3. No custom encryption algorithms are implemented
+		
+		This setting helps streamline App Store review process.
+		For more details, see Apple documentation at:
+		https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations
+		-->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 	</dict>

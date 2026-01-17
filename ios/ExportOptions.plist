@@ -20,6 +20,13 @@
 	<true/>
 	<key>thinning</key>
 	<string>&lt;none&gt;</string>
+	<!-- 
+	Encryption Export Compliance:
+	ITSAppUsesNonExemptEncryption=false indicates this app uses only standard
+	encryption APIs provided by Apple or public domain encryption.
+	This helps streamline the app review process by declaring compliance
+	with US export regulations without requiring additional documentation.
+	-->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>compileBitcode</key>
