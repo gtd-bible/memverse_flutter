@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Dev)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=MEMVERSE_CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}"
+      ],
+      "env": {
+        "FLUTTER_WEB_DEBUG": "true"
+      }
+    },
+    {
+      "name": "Flutter (iOS)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=MEMVERSE_CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}"
+      ],
+      "deviceId": "ios"
+    },
+    {
+      "name": "Flutter (Android)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=MEMVERSE_CLIENT_ID=${env:MEMVERSE_CLIENT_ID}",
+        "--dart-define=MEMVERSE_CLIENT_API_KEY=${env:MEMVERSE_CLIENT_API_KEY}"
+      ],
+      "deviceId": "android"
+    }
+  ]
+}

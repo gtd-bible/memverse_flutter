@@ -1,0 +1,15 @@
+### IMPORTANT: TEMPORARY TEST EMAILS - TOBEDELETED ###
+
+The following email addresses were used for testing the signup functionality:
+
+test_user_2026_01_11@example.com - Used for signup flow testing
+memverse_test_2026_01@example.com - Used for error case testing
+
+NOTE TO REVIEWERS: 
+- These emails do NOT actually exist
+- They were used only for test script development
+- No actual accounts were created
+- This file should NOT be committed to the repository
+- After testing, all test accounts should be removed from the database
+
+### END OF TEMPORARY TEST EMAILS LIST ###

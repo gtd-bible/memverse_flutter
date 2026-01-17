@@ -1,223 +1,221 @@
-import 'dart:ui';
+import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mini_memverse/services/app_logger_facade.dart';
+import 'package:mini_memverse/src/app/app.dart';
+import 'package:mini_memverse/src/bootstrap.dart';
+import 'package:mini_memverse/src/common/providers/talker_provider.dart';
+import 'package:mini_memverse/src/constants/app_constants.dart' as app_constants;
+import 'package:mini_memverse/src/monitoring/analytics_facade.dart';
 
 import 'firebase_options.dart';
-import 'services/analytics_manager.dart';
-import 'services/app_logger.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FlutterError.onError = (errorDetails) {
-    AnalyticsManager.instance.crashlytics.recordFlutterFatalError(errorDetails);
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    AnalyticsManager.instance.crashlytics.recordError(error, stack, fatal: true);
-    return true;
-  };
-  runApp(const MyApp());
-}
+/// Error widget shown when required configuration is missing
+class ConfigurationErrorWidget extends StatelessWidget {
+  /// Creates a new ConfigurationErrorWidget
+  const ConfigurationErrorWidget({required this.error, super.key});
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  /// The error message to display
+  final String error;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      final newCounter = _counter + 1;
-      _counter = newCounter;
-      _handleCounterEvent(newCounter);
-    });
-  }
-
-  Future<void> _handleCounterEvent(int counterValue) async {
-    switch (counterValue) {
-      case 1:
-        await AnalyticsManager.instance.logEvent('counter_event_1', {
-          'message': 'First push - analytics only',
-        });
-        break;
-      case 2:
-        await AnalyticsManager.instance.logEvent('counter_event_2', {
-          'message': 'Second push - sending NFE',
-        });
-        await _sendNonFatalException();
-        break;
-      case 3:
-        await AnalyticsManager.instance.logEvent('counter_event_3', {
-          'message': 'Third push - sending fatal crash',
-        });
-        await _sendFatalCrash();
-        break;
-      default:
-        await AnalyticsManager.instance.logEvent('counter_event_$counterValue', {
-          'message': 'Push #$counterValue - regular analytics',
-        });
-    }
-  }
-
-  Future<void> _sendNonFatalException() async {
-    try {
-      throw Exception('Test non-fatal exception from counter event');
-    } catch (error, stack) {
-      await AnalyticsManager.instance.recordNonFatalError(
-        error,
-        stack,
-        analyticsAttributes: {'source': 'counter_event'},
-      );
-    }
-  }
-
-  Future<void> _sendFatalCrash() async {
-    try {
-      throw StateError('Test fatal crash from counter event');
-    } catch (error, stack) {
-      await AnalyticsManager.instance.recordFatalError(
-        error,
-        stack,
-        analyticsAttributes: {'source': 'counter_event'},
-      );
-    }
-  }
-
-  void _forceCrash() {
-    AnalyticsManager.instance.forceCrash(analyticsAttributes: {'source': 'button'});
-  }
-
-  Future<void> _sendNFE() async {
-    try {
-      throw Exception('Test NFE from button');
-    } catch (error, stack) {
-      await AnalyticsManager.instance.recordNonFatalError(
-        error,
-        stack,
-        analyticsAttributes: {'source': 'button'},
-      );
-    }
-  }
-
-  Future<void> _call404API() async {
-    try {
-      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/postsss'));
-      AppLogger.info('404 API response: ${response.statusCode}');
-    } catch (error) {
-      AppLogger.error('404 API call failed: $error', error, StackTrace.current, false, {
-        'source': 'button',
-        'error_type': 'http_404',
-        'url': 'https://jsonplaceholder.typicode.com/postsss',
-      });
-    }
-  }
-
-  Future<void> _call500API() async {
-    try {
-      final response = await http.get(Uri.parse('https://httpbin.org/status/500'));
-      AppLogger.info('500 API response: ${response.statusCode}');
-    } catch (error) {
-      AppLogger.error('500 API call failed: $error', error, StackTrace.current, false, {
-        'source': 'button',
-        'error_type': 'http_500',
-        'url': 'https://httpbin.org/status/500',
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+  Widget build(BuildContext context) => MaterialApp(
+    home: Scaffold(
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
           child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //
-            // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-            // action in the IDE, or press "p" in the console), to see the
-            // wireframe for each widget.
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('You have pushed the button this many times:'),
-              Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 32),
-              const Text('Test Buttons (Counter behavior):'),
-              const Text('1st push: analytics | 2nd push: NFE | 3rd push: crash'),
-              const SizedBox(height: 32),
-              const Text('Manual Test Buttons:'),
+              const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 80),
+              const SizedBox(height: 24),
+              const Text(
+                'Configuration Error',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _forceCrash, child: const Text('Force Crash')),
+              Text(error, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 24),
+              const Text(
+                'Please run the app with this exact command:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              ElevatedButton(onPressed: _sendNFE, child: const Text('Send NFE')),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const SelectableText(
+                  'flutter run \\\n'
+                  '  --dart-define=MEMVERSE_CLIENT_ID=\$MEMVERSE_CLIENT_ID \\\n'
+                  '  --dart-define=MEMVERSE_CLIENT_API_KEY=\$MEMVERSE_CLIENT_API_KEY',
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Make sure these environment variables are set in your shell:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
               const SizedBox(height: 8),
-              ElevatedButton(onPressed: _call404API, child: const Text('Call 404 API')),
-              const SizedBox(height: 8),
-              ElevatedButton(onPressed: _call500API, child: const Text('Call 500 API')),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const SelectableText(
+                  'export MEMVERSE_CLIENT_ID="your_client_id_value"\n'
+                  'export MEMVERSE_CLIENT_API_KEY="your_api_key_value"',
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'See SETUP.md for more information',
+                style: TextStyle(fontSize: 14, color: Colors.blue),
+              ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+    ),
+  );
+}
+
+Future<void> main() async {
+  // Initialize Flutter binding
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Check required environment variables
+  final memverseClientId = app_constants.memverseClientId;
+  final clientSecret = app_constants.memverseClientSecret;
+
+  // Simple environment check (until we can generate the EnvChecker class)
+  final envCheckPassed =
+      memverseClientId.isNotEmpty &&
+      clientSecret.isNotEmpty &&
+      memverseClientId != "\$MEMVERSE_CLIENT_ID" &&
+      clientSecret != "\$MEMVERSE_CLIENT_API_KEY";
+
+  // Show detailed error message if environment variables are missing or invalid
+  if (!envCheckPassed) {
+    debugPrint('❌ Environment variable check failed! Check logs for details.');
+
+    String errorDetails = 'One or more required environment variables are missing or invalid.\n\n';
+
+    // Build specific error messages based on which variables failed
+    if (memverseClientId.isEmpty || memverseClientId == '\$MEMVERSE_CLIENT_ID') {
+      errorDetails +=
+          '• MEMVERSE_CLIENT_ID: ${memverseClientId.isEmpty ? "Missing" : "Unsubstituted"}\n';
+    }
+
+    if (clientSecret.isEmpty || clientSecret == '\$MEMVERSE_CLIENT_API_KEY') {
+      errorDetails +=
+          '• MEMVERSE_CLIENT_API_KEY: ${clientSecret.isEmpty ? "Missing" : "Unsubstituted"}\n';
+    }
+
+    errorDetails +=
+        '\nPossible causes:\n'
+        '1. Environment variables not defined in your shell\n'
+        '2. Forgot to use --dart-define flags\n'
+        '3. Using literal \$ variables instead of actual values\n';
+
+    runApp(ConfigurationErrorWidget(error: errorDetails));
+    return;
+  }
+
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+    // Create a ProviderContainer to access providers
+    final container = ProviderContainer();
+
+    // Get the analytics facade for error tracking
+    final analyticsFacade = container.read(analyticsFacadeProvider);
+
+    // Get the logger facade
+    final appLogger = container.read(appLoggerFacadeProvider);
+
+    // Get the talker instance
+    final talker = container.read(talkerProvider);
+
+    // Set up error handlers
+    FlutterError.onError = (errorDetails) {
+      // Log the error with our logger facade
+      appLogger.error(
+        'Flutter error caught by global handler',
+        errorDetails.exception,
+        errorDetails.stack,
+        true, // record to crashlytics
+        {
+          'error_context': 'FlutterError.onError',
+          'library': errorDetails.library ?? 'unknown',
+          'context': errorDetails.context?.toString() ?? 'unknown',
+        },
+      );
+
+      // Also send to talker for UI display
+      talker.handle(errorDetails.exception, errorDetails.stack);
+    };
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      // Log the fatal error with our logger facade
+      appLogger.fatal('Platform error caught by global handler', error, stack, {
+        'error_context': 'PlatformDispatcher.onError',
+      });
+
+      // Also send to talker for UI display
+      talker.handle(error, stack);
+
+      return true;
+    };
+
+    // Log initialization success
+    appLogger.i('🌟 App starting with configuration:');
+    appLogger.i(
+      '🔐 MEMVERSE_CLIENT_ID: ${memverseClientId.substring(0, 3)}...${memverseClientId.substring(memverseClientId.length - 3)} (${memverseClientId.length} chars)',
     );
+    appLogger.i(
+      '🔑 MEMVERSE_CLIENT_API_KEY: ${clientSecret.substring(0, 3)}...${clientSecret.substring(clientSecret.length - 3)} (${clientSecret.length} chars)',
+    );
+    appLogger.i('🌍 Using API URL: https://www.memverse.com');
+    appLogger.i('🚀 Firebase Analytics initialized');
+
+    // Initialize the app with Riverpod
+    await bootstrap(() => const App());
+  } catch (error, stackTrace) {
+    // Fall back to direct logging if our logger setup fails
+    if (kDebugMode) {
+      debugPrint('💥 FATAL ERROR: $error');
+      debugPrint(stackTrace.toString());
+    }
+
+    // Try to record to crashlytics directly as a last resort
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'Fatal initialization error',
+      );
+    } catch (e) {
+      // Nothing more we can do - this is a catastrophic failure
+      if (kDebugMode) {
+        debugPrint('💥 CATASTROPHIC: Failed to report initialization error: $e');
+      }
+    }
+
+    // Let the platform handle the fatal error
+    rethrow;
   }
 }
